@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id     String      @id @default(uuid())
+  role   AdminRole
+  status AdminStatus @default(ok)
+  User   User?       @relation(fields: [userId], references: [id])
+  userId String      @unique
+}
+
+model User {
+  id              String           @id @default(uuid())
+  username        String           @unique @default(uuid())
+  password        String           @db.VarChar(255)
+  status          UserStatus       @default(unverified)
+  UserInformation UserInformation?
+  Admin           Admin?
+  Borrowing       Borrowing[]
+  Log             UserLog[]
+}
+
+model UserLog {
+  id         String   @id @default(uuid())
+  datetime   DateTime @default(now())
+  type       String   @db.VarChar(20)
+  content    Json     @db.Json
+  User       User?    @relation(fields: [userId], references: [id])
+  userId     String?
+  User       User?    @relation(fields: [operatorId], references: [id])
+  operatorId String?
+}
+
+model UserInformation {
+  id         String   @id @default(uuid())
+  lastname   String   @db.VarChar(255)
+  firstname  String   @db.VarChar(255)
+  middlename String   @db.VarChar(255)
+  suffix     String   @db.VarChar(20)
+  gender     Gender
+  birthdate  DateTime @db.Date
+  User       User?    @relation(fields: [userId], references: [id])
+  userId     String   @unique
+}
+
+model Asset {
+  id        String      @id @default(uuid())
+  name      String      @db.VarChar(255)
+  brand     String      @db.VarChar(255)
+  type      String      @db.VarChar(255)
+  status    AssetStatus
+  Borrowing Borrowing[]
+}
+
+model Borrowing {
+  id               String          @id @default(uuid())
+  datetimeBorrowed DateTime
+  datetimeReturned DateTime
+  remarksBorrowed  String          @db.Text
+  remarksReturned  String          @db.Text
+  status           BorrowingStatus
+  Asset            Asset?          @relation(fields: [assetId], references: [id])
+  assetId          String?
+  User             User?           @relation(fields: [userId], references: [id])
+  userId           String?
+}
+
+enum AdminRole {
+  admin
+  staff
+}
+
+enum AdminStatus {
+  ok
+  removed
+}
+
+enum AssetStatus {
+  good
+  broken
+  removed
+}
+
+enum BorrowingStatus {
+  pending
+  borrowed
+  returned
+}
+
+enum Gender {
+  male
+  female
+}
+
+enum UserStatus {
+  nur
+  unverified
+  ok
+  deactivated
+  removed
+  suspended
+}
