@@ -30,14 +30,96 @@ model AdminLog {
   operatorId String?
 }
 
+model Customer {
+  id          String         @id @default(uuid())
+  address     String         @db.Text
+  phone       String         @db.VarChar(20)
+  email       String         @db.VarChar(255)
+  status      CustomerStatus @default(ok)
+  User        User?          @relation(fields: [userId], references: [id])
+  userId      String         @unique
+  Event       Event[]
+  CustomerLog CustomerLog[]
+}
+
+model CustomerLog {
+  id         String    @id @default(uuid())
+  datetime   DateTime  @default(now())
+  type       String    @db.VarChar(20)
+  content    Json      @db.Json
+  Customer   Customer? @relation(fields: [customerId], references: [id])
+  customerId String?
+  Operator   User?     @relation("Operator", fields: [operatorId], references: [id])
+  operatorId String?
+}
+
+model Event {
+  id            String        @id @default(uuid())
+  datetimeStart DateTime
+  datetimeEnd   DateTime
+  type          String        @db.VarChar(20)
+  name          String        @db.VarChar(255)
+  address       String        @db.Text
+  status        EventStatus   @default(active)
+  Customer      Customer?     @relation(fields: [customerId], references: [id])
+  customerId    String?
+  EventSupply   EventSupply[]
+  EventLog      EventLog[]
+}
+
+model EventLog {
+  id         String   @id @default(uuid())
+  datetime   DateTime @default(now())
+  type       String   @db.VarChar(20)
+  content    Json     @db.Json
+  Event      Event?   @relation(fields: [eventId], references: [id])
+  eventId    String?
+  Operator   User?    @relation("Operator", fields: [operatorId], references: [id])
+  operatorId String?
+}
+
+model EventSupply {
+  id             String            @id @default(uuid())
+  quantity       Int
+  status         EventSupplyStatus @default(ok)
+  Event          Event?            @relation(fields: [eventId], references: [id])
+  eventId        String?
+  Supply         Supply?           @relation(fields: [supplyId], references: [id])
+  supplyId       String?
+  EventSupplyLog EventSupplyLog[]
+}
+
+model EventSupplyLog {
+  id            String       @id @default(uuid())
+  datetime      DateTime     @default(now())
+  type          String       @db.VarChar(20)
+  content       Json         @db.Json
+  EventSupply   EventSupply? @relation(fields: [eventSupplyId], references: [id])
+  eventSupplyId String?
+  Operator      User?        @relation("Operator", fields: [operatorId], references: [id])
+  operatorId    String?
+}
+
 model Supplier {
-  id      String         @id @default(uuid())
-  name    String         @db.VarChar(255)
-  address String         @db.Text
-  phone   String         @db.VarChar(20)
-  email   String         @db.VarChar(255)
-  status  SupplierStatus @default(ok)
-  Order   Order[]
+  id          String         @id @default(uuid())
+  name        String         @db.VarChar(255)
+  address     String         @db.Text
+  phone       String         @db.VarChar(20)
+  email       String         @db.VarChar(255)
+  status      SupplierStatus @default(ok)
+  Order       Order[]
+  SupplierLog SupplierLog[]
+}
+
+model SupplierLog {
+  id         String    @id @default(uuid())
+  datetime   DateTime  @default(now())
+  type       String    @db.VarChar(20)
+  content    Json      @db.Json
+  Supplier   Supplier? @relation(fields: [supplierId], references: [id])
+  supplierId String?
+  Operator   User?     @relation("Operator", fields: [operatorId], references: [id])
+  operatorId String?
 }
 
 model Supply {
@@ -63,6 +145,69 @@ model SupplyLog {
   operatorId String?
 }
 
+model Order {
+  id               String        @id @default(uuid())
+  datetimeOrdered  DateTime
+  datetimeExpected DateTime
+  datetimeArrived  DateTime
+  status           OrderStatus   @default(active)
+  OrderSupply      OrderSupply[]
+  Supplier         Supplier?     @relation(fields: [supplierId], references: [id])
+  supplierId       String?
+  OrderLog         OrderLog[]
+}
+
+model OrderLog {
+  id         String   @id @default(uuid())
+  datetime   DateTime @default(now())
+  type       String   @db.VarChar(20)
+  content    Json     @db.Json
+  Order      Order?   @relation(fields: [orderId], references: [id])
+  orderId    String?
+  Operator   User?    @relation("Operator", fields: [operatorId], references: [id])
+  operatorId String?
+}
+
+model OrderSupply {
+  id             String            @id @default(uuid())
+  quantity       Int
+  status         OrderSupplyStatus @default(ok)
+  Order          Order?            @relation(fields: [orderId], references: [id])
+  orderId        String?
+  Supply         Supply?           @relation(fields: [supplyId], references: [id])
+  supplyId       String?
+  OrderSupplyLog OrderSupplyLog[]
+}
+
+model OrderSupplyLog {
+  id            String       @id @default(uuid())
+  datetime      DateTime     @default(now())
+  type          String       @db.VarChar(20)
+  content       Json         @db.Json
+  OrderSupply   OrderSupply? @relation(fields: [orderSupplyId], references: [id])
+  orderSupplyId String?
+  Operator      User?        @relation("Operator", fields: [operatorId], references: [id])
+  operatorId    String?
+}
+
+model Task {
+  id      String     @id @default(uuid())
+  name    String     @db.VarChar(255)
+  status  TaskStatus @default(active)
+  TaskLog TaskLog[]
+}
+
+model TaskLog {
+  id         String   @id @default(uuid())
+  datetime   DateTime @default(now())
+  type       String   @db.VarChar(20)
+  content    Json     @db.Json
+  Task       Task?    @relation(fields: [taskId], references: [id])
+  taskId     String?
+  Operator   User?    @relation("Operator", fields: [operatorId], references: [id])
+  operatorId String?
+}
+
 model User {
   id                         String               @id @default(uuid())
   username                   String               @unique @default(uuid())
@@ -70,9 +215,17 @@ model User {
   status                     UserStatus           @default(unverified)
   UserInformation            UserInformation?
   Admin                      Admin?
+  Customer                   Customer?
   UserLog                    UserLog[]
   AdminLogOperator           AdminLog[]           @relation("Operator")
+  CustomerLogOperator        CustomerLog[]        @relation("Operator")
+  EventLogOperator           EventLog[]           @relation("Operator")
+  EventSupplyLogOperator     EventSupplyLog[]     @relation("Operator")
+  SupplierLogOperator        SupplierLog[]        @relation("Operator")
   SupplyLogOperator          SupplyLog[]          @relation("Operator")
+  OrderLogOperator           OrderLog[]           @relation("Operator")
+  OrderSupplyLogOperator     OrderSupplyLog[]     @relation("Operator")
+  TaskLogOperator            TaskLog[]            @relation("Operator")
   UserLogOperator            UserLog[]            @relation("Operator")
   UserInformationLogOperator UserInformationLog[] @relation("Operator")
 }
@@ -122,20 +275,58 @@ enum AdminStatus {
   removed
 }
 
-enum SupplyStatus {
+enum CustomerStatus {
   ok
+  flagged
   removed
 }
 
-enum BorrowingStatus {
-  pending
-  borrowed
-  returned
+enum EventStatus {
+  active
+  cancelled
+  completed
+  removed
+  unpaid
+}
+
+enum EventSupplyStatus {
+  ok
+  removed
 }
 
 enum Gender {
   male
   female
+}
+
+enum OrderStatus {
+  active
+  arrived
+  cancelled
+  removed
+}
+
+enum OrderSupplyStatus {
+  ok
+  removed
+}
+
+enum SupplierStatus {
+  ok
+  flagged
+  removed
+}
+
+enum SupplyStatus {
+  ok
+  removed
+}
+
+enum TaskStatus {
+  active
+  completed
+  onhold
+  removed
 }
 
 enum UserStatus {
