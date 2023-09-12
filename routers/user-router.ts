@@ -307,7 +307,7 @@ class UserRouter {
 
   private setSelectRoute = async () => {
     this.router.get(
-      this.getRoute,
+      this.selectRoute,
       [
         this.authService.verifyToken,
         this.authService.verifyUser,

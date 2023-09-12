@@ -3,19 +3,22 @@ import express from "express";
 import UserRouter from "./routers/user-router";
 import UserInformationRouter from "./routers/user-information-router";
 import AdminRouter from "./routers/admin-router";
-import AssetRouter from "./routers/asset-router";
+import CustomerRouter from "./routers/customer-router";
+import EventRouter from "./routers/event-router";
 
 class App {
   static instance: App;
   private express = express();
 
   private adminRoute: string = "/admin";
-  private assetRoute: string = "/asset";
+  private customerRoute: string = "/customer";
+  private eventRoute: string = "/event";
   private userRoute: string = "/user";
   private userInformationRoute: string = "/user-information";
 
   private adminRouter: AdminRouter;
-  private assetRouter: AssetRouter;
+  private customerRouter: CustomerRouter;
+  private eventRouter: EventRouter;
   private userRouter: UserRouter;
   private userInformationRouter: UserInformationRouter;
 
@@ -25,6 +28,12 @@ class App {
     this.adminRouter = new AdminRouter();
     this.express.use(this.adminRoute, this.adminRouter.router);
 
+    this.customerRouter = new CustomerRouter();
+    this.express.use(this.customerRoute, this.customerRouter.router);
+
+    this.eventRouter = new EventRouter();
+    this.express.use(this.eventRoute, this.eventRouter.router);
+
     this.userRouter = new UserRouter();
     this.express.use(this.userRoute, this.userRouter.router);
 
@@ -33,9 +42,6 @@ class App {
       this.userInformationRoute,
       this.userInformationRouter.router
     );
-
-    this.assetRouter = new AssetRouter();
-    this.express.use(this.assetRoute, this.assetRouter.router);
 
     this.express.listen(process.env.PORT);
     console.log(`Running in port ${process.env.PORT}.`);

@@ -3,7 +3,7 @@ import { Router } from "express";
 import AuthenticationService from "../services/authentication-service";
 import PrismaService from "../services/prisma-service";
 
-class BorrowingRouter {
+class CustomerRouter {
   public router: Router;
   private authService: AuthenticationService =
     AuthenticationService.getInstance();
@@ -35,23 +35,23 @@ class BorrowingRouter {
       async (req: Request, res: Response) => {
         try {
           console.log(
-            `Creating borrowing using the following data: ${JSON.stringify(
+            `Creating customer using the following data: ${JSON.stringify(
               req.body.data
             )}`
           );
-          const borrowing = await this.prismaService.prisma.borrowing.create({
+          const customer = await this.prismaService.prisma.customer.create({
             data: req.body.data,
           });
-          console.log(`Borrowing created: ${JSON.stringify(borrowing)}`);
-          await this.prismaService.prisma.borrowingLog.create({
+          console.log(`Customer created: ${JSON.stringify(customer)}`);
+          await this.prismaService.prisma.customerLog.create({
             data: {
               type: "create",
-              borrowingId: borrowing.id,
+              customerId: customer.id,
               operatorId: req.body.decodedToken.id,
-              content: borrowing,
+              content: customer,
             },
           });
-          res.status(200).json({ id: borrowing.id });
+          res.status(200).json({ id: customer.id });
         } catch (error) {
           console.error(error);
           res.status(500).json({
@@ -73,30 +73,26 @@ class BorrowingRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.borrowing.findMany({
+          let result = await this.prismaService.prisma.customer.findMany({
             where: {
-              OR: [{ status: "pending" }, { status: "borrowed" }],
+              OR: [{ status: "ok" }, { status: "flagged" }],
             },
             select: {
               id: true,
-              datetimeBorrowed: true,
-              datetimeReturned: true,
-              remarksBorrowed: true,
-              remarksReturned: true,
+              address: true,
+              phone: true,
+              email: true,
               status: true,
-              BorrowingLog: {
+              CustomerLog: {
                 select: {
-                  id: true,
                   datetime: true,
                   type: true,
                   content: true,
                   Operator: {
                     select: {
-                      id: true,
                       username: true,
                       UserInformation: {
                         select: {
-                          id: true,
                           lastname: true,
                           firstname: true,
                           middlename: true,
@@ -109,19 +105,11 @@ class BorrowingRouter {
                   },
                 },
               },
-              Asset: {
-                select: {
-                  id: true,
-                  name: true,
-                  brand: true,
-                  type: true,
-                  status: true,
-                },
-              },
               User: {
                 select: {
                   id: true,
                   username: true,
+                  status: true,
                   UserInformation: {
                     select: {
                       id: true,
@@ -131,7 +119,6 @@ class BorrowingRouter {
                       suffix: true,
                       gender: true,
                       birthdate: true,
-                      userId: true,
                     },
                   },
                 },
@@ -164,38 +151,26 @@ class BorrowingRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.borrowing.findMany({
+          let result = await this.prismaService.prisma.customer.findMany({
             where: {
-              AND: [
-                { OR: [{ status: "pending" }, { status: "borrowed" }] },
-                {
-                  datetimeBorrowed: {
-                    gte: req.body.start,
-                    lte: req.body.end,
-                  },
-                },
-              ],
+              OR: [{ status: "ok" }, { status: "flagged" }],
             },
             select: {
               id: true,
-              datetimeBorrowed: true,
-              datetimeReturned: true,
-              remarksBorrowed: true,
-              remarksReturned: true,
+              address: true,
+              phone: true,
+              email: true,
               status: true,
-              BorrowingLog: {
+              CustomerLog: {
                 select: {
-                  id: true,
                   datetime: true,
                   type: true,
                   content: true,
                   Operator: {
                     select: {
-                      id: true,
                       username: true,
                       UserInformation: {
                         select: {
-                          id: true,
                           lastname: true,
                           firstname: true,
                           middlename: true,
@@ -208,20 +183,22 @@ class BorrowingRouter {
                   },
                 },
               },
-              Asset: {
-                select: {
-                  id: true,
-                  name: true,
-                  brand: true,
-                  type: true,
-                  status: true,
-                },
-              },
               User: {
+                where: {
+                  status: "nur",
+                },
                 select: {
                   id: true,
                   username: true,
+                  status: true,
                   UserInformation: {
+                    where: {
+                      OR: [
+                        { lastname: req.body.key },
+                        { firstname: req.body.key },
+                        { middlename: req.body.key },
+                      ],
+                    },
                     select: {
                       id: true,
                       lastname: true,
@@ -230,7 +207,6 @@ class BorrowingRouter {
                       suffix: true,
                       gender: true,
                       birthdate: true,
-                      userId: true,
                     },
                   },
                 },
@@ -255,7 +231,7 @@ class BorrowingRouter {
 
   private setSelectRoute = async () => {
     this.router.get(
-      this.getRoute,
+      this.selectRoute,
       [
         this.authService.verifyToken,
         this.authService.verifyUser,
@@ -263,30 +239,26 @@ class BorrowingRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.borrowing.findMany({
+          let result = await this.prismaService.prisma.customer.findMany({
             where: {
               id: req.body.id,
             },
             select: {
               id: true,
-              datetimeBorrowed: true,
-              datetimeReturned: true,
-              remarksBorrowed: true,
-              remarksReturned: true,
+              address: true,
+              phone: true,
+              email: true,
               status: true,
-              BorrowingLog: {
+              CustomerLog: {
                 select: {
-                  id: true,
                   datetime: true,
                   type: true,
                   content: true,
                   Operator: {
                     select: {
-                      id: true,
                       username: true,
                       UserInformation: {
                         select: {
-                          id: true,
                           lastname: true,
                           firstname: true,
                           middlename: true,
@@ -299,19 +271,11 @@ class BorrowingRouter {
                   },
                 },
               },
-              Asset: {
-                select: {
-                  id: true,
-                  name: true,
-                  brand: true,
-                  type: true,
-                  status: true,
-                },
-              },
               User: {
                 select: {
                   id: true,
                   username: true,
+                  status: true,
                   UserInformation: {
                     select: {
                       id: true,
@@ -321,7 +285,6 @@ class BorrowingRouter {
                       suffix: true,
                       gender: true,
                       birthdate: true,
-                      userId: true,
                     },
                   },
                 },
@@ -355,21 +318,20 @@ class BorrowingRouter {
       async (req: Request, res: Response) => {
         try {
           console.log(
-            `Updating borrowing ${
+            `Updating customer ${
               req.body.id
             } using the following data: ${JSON.stringify(req.body.data)}`
           );
-          let result = await this.prismaService.prisma.borrowing.update({
+          let result = await this.prismaService.prisma.customer.update({
             where: { id: req.body.id },
             data: req.body.data,
           });
           if (!result) return res.status(400).send();
           console.log(`Borrowing ${req.body.id} updated.`);
-          req.body.data.id = req.body.id;
-          await this.prismaService.prisma.borrowingLog.create({
+          await this.prismaService.prisma.customerLog.create({
             data: {
               type: "update",
-              borrowingId: req.body.id,
+              customerId: req.body.id,
               operatorId: req.body.decodedToken.id,
               content: req.body.data,
             },
@@ -387,4 +349,4 @@ class BorrowingRouter {
   };
 }
 
-export default BorrowingRouter;
+export default CustomerRouter;

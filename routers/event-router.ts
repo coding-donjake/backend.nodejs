@@ -3,7 +3,7 @@ import { Router } from "express";
 import AuthenticationService from "../services/authentication-service";
 import PrismaService from "../services/prisma-service";
 
-class AssetRouter {
+class EventRouter {
   public router: Router;
   private authService: AuthenticationService =
     AuthenticationService.getInstance();
@@ -35,24 +35,23 @@ class AssetRouter {
       async (req: Request, res: Response) => {
         try {
           console.log(
-            `Creating asset using the following data: ${JSON.stringify(
+            `Creating event using the following data: ${JSON.stringify(
               req.body.data
             )}`
           );
-          const asset = await this.prismaService.prisma.asset.create({
+          const event = await this.prismaService.prisma.event.create({
             data: req.body.data,
           });
-          console.log(`Asset created: ${JSON.stringify(asset)}`);
-          req.body.data.id = asset.id;
-          await this.prismaService.prisma.assetLog.create({
+          console.log(`Event created: ${JSON.stringify(event)}`);
+          await this.prismaService.prisma.eventLog.create({
             data: {
               type: "create",
-              assetId: asset.id,
+              eventId: event.id,
               operatorId: req.body.decodedToken.id,
-              content: asset,
+              content: event,
             },
           });
-          res.status(200).json({ id: asset.id });
+          res.status(200).json({ id: event.id });
         } catch (error) {
           console.error(error);
           res.status(500).json({
@@ -74,26 +73,36 @@ class AssetRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.asset.findMany({
+          let result = await this.prismaService.prisma.event.findMany({
             where: {
-              OR: [{ status: "good" }, { status: "broken" }],
+              OR: [
+                { status: "active" },
+                { status: "cancelled" },
+                { status: "completed" },
+                { status: "unpaid" },
+              ],
             },
             select: {
               id: true,
-              name: true,
-              brand: true,
+              datetimeStart: true,
+              datetimeEnd: true,
               type: true,
+              name: true,
+              address: true,
               status: true,
-              AssetLog: {
+              EventLog: {
                 select: {
+                  id: true,
                   datetime: true,
                   type: true,
                   content: true,
                   Operator: {
                     select: {
+                      id: true,
                       username: true,
                       UserInformation: {
                         select: {
+                          id: true,
                           lastname: true,
                           firstname: true,
                           middlename: true,
@@ -102,6 +111,53 @@ class AssetRouter {
                           birthdate: true,
                         },
                       },
+                    },
+                  },
+                },
+              },
+              Customer: {
+                select: {
+                  id: true,
+                  address: true,
+                  phone: true,
+                  email: true,
+                  status: true,
+                  User: {
+                    select: {
+                      id: true,
+                      username: true,
+                      status: true,
+                      UserInformation: {
+                        select: {
+                          id: true,
+                          lastname: true,
+                          firstname: true,
+                          middlename: true,
+                          suffix: true,
+                          gender: true,
+                          birthdate: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              EventSupply: {
+                where: {
+                  status: "ok",
+                },
+                select: {
+                  id: true,
+                  quantity: true,
+                  status: true,
+                  Supply: {
+                    select: {
+                      id: true,
+                      name: true,
+                      brand: true,
+                      type: true,
+                      stock: true,
+                      status: true,
                     },
                   },
                 },
@@ -134,26 +190,44 @@ class AssetRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.asset.findMany({
+          let result = await this.prismaService.prisma.event.findMany({
             where: {
               AND: [
-                { OR: [{ status: "good" }, { status: "broken" }] },
                 {
                   OR: [
-                    { name: req.body.key },
-                    { brand: req.body.key },
-                    { type: req.body.key },
+                    { status: "active" },
+                    { status: "cancelled" },
+                    { status: "completed" },
+                    { status: "unpaid" },
+                  ],
+                },
+                {
+                  OR: [
+                    {
+                      datetimeStart: {
+                        gte: req.body.start,
+                        lte: req.body.end,
+                      },
+                    },
+                    {
+                      datetimeEnd: {
+                        gte: req.body.start,
+                        lte: req.body.end,
+                      },
+                    },
                   ],
                 },
               ],
             },
             select: {
               id: true,
-              name: true,
-              brand: true,
+              datetimeStart: true,
+              datetimeEnd: true,
               type: true,
+              name: true,
+              address: true,
               status: true,
-              AssetLog: {
+              EventLog: {
                 select: {
                   id: true,
                   datetime: true,
@@ -178,6 +252,53 @@ class AssetRouter {
                   },
                 },
               },
+              Customer: {
+                select: {
+                  id: true,
+                  address: true,
+                  phone: true,
+                  email: true,
+                  status: true,
+                  User: {
+                    select: {
+                      id: true,
+                      username: true,
+                      status: true,
+                      UserInformation: {
+                        select: {
+                          id: true,
+                          lastname: true,
+                          firstname: true,
+                          middlename: true,
+                          suffix: true,
+                          gender: true,
+                          birthdate: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              EventSupply: {
+                where: {
+                  status: "ok",
+                },
+                select: {
+                  id: true,
+                  quantity: true,
+                  status: true,
+                  Supply: {
+                    select: {
+                      id: true,
+                      name: true,
+                      brand: true,
+                      type: true,
+                      stock: true,
+                      status: true,
+                    },
+                  },
+                },
+              },
             },
           });
           if (!result) return res.status(400).send();
@@ -198,7 +319,7 @@ class AssetRouter {
 
   private setSelectRoute = async () => {
     this.router.get(
-      this.getRoute,
+      this.selectRoute,
       [
         this.authService.verifyToken,
         this.authService.verifyUser,
@@ -206,26 +327,31 @@ class AssetRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.asset.findMany({
+          let result = await this.prismaService.prisma.event.findMany({
             where: {
               id: req.body.id,
             },
             select: {
               id: true,
-              name: true,
-              brand: true,
+              datetimeStart: true,
+              datetimeEnd: true,
               type: true,
+              name: true,
+              address: true,
               status: true,
-              AssetLog: {
+              EventLog: {
                 select: {
+                  id: true,
                   datetime: true,
                   type: true,
                   content: true,
                   Operator: {
                     select: {
+                      id: true,
                       username: true,
                       UserInformation: {
                         select: {
+                          id: true,
                           lastname: true,
                           firstname: true,
                           middlename: true,
@@ -234,6 +360,53 @@ class AssetRouter {
                           birthdate: true,
                         },
                       },
+                    },
+                  },
+                },
+              },
+              Customer: {
+                select: {
+                  id: true,
+                  address: true,
+                  phone: true,
+                  email: true,
+                  status: true,
+                  User: {
+                    select: {
+                      id: true,
+                      username: true,
+                      status: true,
+                      UserInformation: {
+                        select: {
+                          id: true,
+                          lastname: true,
+                          firstname: true,
+                          middlename: true,
+                          suffix: true,
+                          gender: true,
+                          birthdate: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              EventSupply: {
+                where: {
+                  status: "ok",
+                },
+                select: {
+                  id: true,
+                  quantity: true,
+                  status: true,
+                  Supply: {
+                    select: {
+                      id: true,
+                      name: true,
+                      brand: true,
+                      type: true,
+                      stock: true,
+                      status: true,
                     },
                   },
                 },
@@ -267,20 +440,21 @@ class AssetRouter {
       async (req: Request, res: Response) => {
         try {
           console.log(
-            `Updating asset ${
+            `Updating event ${
               req.body.id
             } using the following data: ${JSON.stringify(req.body.data)}`
           );
-          let result = await this.prismaService.prisma.asset.update({
+          let result = await this.prismaService.prisma.event.update({
             where: { id: req.body.id },
             data: req.body.data,
           });
           if (!result) return res.status(400).send();
-          console.log(`Borrowing ${req.body.id} updated.`);
-          await this.prismaService.prisma.assetLog.create({
+          console.log(`Event ${req.body.id} updated.`);
+          req.body.data.id = req.body.id;
+          await this.prismaService.prisma.eventLog.create({
             data: {
               type: "update",
-              assetId: req.body.id,
+              eventId: req.body.id,
               operatorId: req.body.decodedToken.id,
               content: req.body.data,
             },
@@ -298,4 +472,4 @@ class AssetRouter {
   };
 }
 
-export default AssetRouter;
+export default EventRouter;

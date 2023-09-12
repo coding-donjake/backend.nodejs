@@ -1,12 +1,14 @@
 import { Request, Response } from "express";
 import { Router } from "express";
 import PrismaService from "../services/prisma-service";
+import HashService from "../services/hash-service";
 import AuthenticationService from "../services/authentication-service";
 
-class AdminRouter {
+class SupplierRouter {
   public router: Router;
   private authService: AuthenticationService =
     AuthenticationService.getInstance();
+  private hashService: HashService = HashService.getInstance();
   private prismaService: PrismaService = PrismaService.getInstance();
 
   private createRoute: string = "/create";
@@ -35,23 +37,23 @@ class AdminRouter {
       async (req: Request, res: Response) => {
         try {
           console.log(
-            `Creating admin using the following data: ${JSON.stringify(
+            `Creating supplier using the following data: ${JSON.stringify(
               req.body.data
             )}`
           );
-          const admin = await this.prismaService.prisma.admin.create({
+          const supplier = await this.prismaService.prisma.supplier.create({
             data: req.body.data,
           });
-          console.log(`Admin created: ${JSON.stringify(admin)}`);
-          await this.prismaService.prisma.adminLog.create({
+          console.log(`Supplier created: ${JSON.stringify(supplier)}`);
+          await this.prismaService.prisma.userLog.create({
             data: {
               type: "create",
-              adminId: admin.id,
+              userId: supplier.id,
               operatorId: req.body.decodedToken.id,
-              content: admin,
+              content: supplier,
             },
           });
-          res.status(200).json({ id: admin.id });
+          res.status(200).json({ id: supplier.id });
         } catch (error) {
           console.error(error);
           res.status(500).json({
@@ -73,15 +75,15 @@ class AdminRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.admin.findMany({
+          let result = await this.prismaService.prisma.supplier.findMany({
             where: {
-              OR: [{ status: "ok" }],
+              OR: [{ status: "ok" }, { status: "unverified" }],
             },
             select: {
               id: true,
-              role: true,
+              username: true,
               status: true,
-              AdminLog: {
+              UserLog: {
                 select: {
                   id: true,
                   datetime: true,
@@ -106,20 +108,39 @@ class AdminRouter {
                   },
                 },
               },
-              User: {
+              UserInformation: {
                 select: {
                   id: true,
-                  username: true,
-                  status: true,
-                  UserInformation: {
+                  lastname: true,
+                  firstname: true,
+                  middlename: true,
+                  suffix: true,
+                  gender: true,
+                  birthdate: true,
+                  userId: true,
+                  UserInformationLog: {
                     select: {
                       id: true,
-                      lastname: true,
-                      firstname: true,
-                      middlename: true,
-                      suffix: true,
-                      gender: true,
-                      birthdate: true,
+                      datetime: true,
+                      type: true,
+                      content: true,
+                      Operator: {
+                        select: {
+                          id: true,
+                          username: true,
+                          UserInformation: {
+                            select: {
+                              id: true,
+                              lastname: true,
+                              firstname: true,
+                              middlename: true,
+                              suffix: true,
+                              gender: true,
+                              birthdate: true,
+                            },
+                          },
+                        },
+                      },
                     },
                   },
                 },
@@ -128,7 +149,7 @@ class AdminRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} users send to user ${req.body.decodedToken.id}.`
+            `${result.length} users send to supplier ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -152,15 +173,15 @@ class AdminRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.admin.findMany({
+          let result = await this.prismaService.prisma.supplier.findMany({
             where: {
-              OR: [{ status: "ok" }],
+              OR: [{ status: "ok" }, { status: "unverified" }],
             },
             select: {
               id: true,
-              role: true,
+              username: true,
               status: true,
-              AdminLog: {
+              UserLog: {
                 select: {
                   id: true,
                   datetime: true,
@@ -185,27 +206,46 @@ class AdminRouter {
                   },
                 },
               },
-              User: {
+              UserInformation: {
+                where: {
+                  OR: [
+                    { lastname: req.body.key },
+                    { firstname: req.body.key },
+                    { middlename: req.body.key },
+                  ],
+                },
                 select: {
                   id: true,
-                  username: true,
-                  status: true,
-                  UserInformation: {
-                    where: {
-                      OR: [
-                        { lastname: req.body.key },
-                        { firstname: req.body.key },
-                        { middlename: req.body.key },
-                      ],
-                    },
+                  lastname: true,
+                  firstname: true,
+                  middlename: true,
+                  suffix: true,
+                  gender: true,
+                  birthdate: true,
+                  userId: true,
+                  UserInformationLog: {
                     select: {
                       id: true,
-                      lastname: true,
-                      firstname: true,
-                      middlename: true,
-                      suffix: true,
-                      gender: true,
-                      birthdate: true,
+                      datetime: true,
+                      type: true,
+                      content: true,
+                      Operator: {
+                        select: {
+                          id: true,
+                          username: true,
+                          UserInformation: {
+                            select: {
+                              id: true,
+                              lastname: true,
+                              firstname: true,
+                              middlename: true,
+                              suffix: true,
+                              gender: true,
+                              birthdate: true,
+                            },
+                          },
+                        },
+                      },
                     },
                   },
                 },
@@ -214,7 +254,7 @@ class AdminRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} users send to user ${req.body.decodedToken.id}.`
+            `${result.length} users send to supplier ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -238,15 +278,15 @@ class AdminRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.admin.findMany({
+          let result = await this.prismaService.prisma.supplier.findMany({
             where: {
               id: req.body.id,
             },
             select: {
               id: true,
-              role: true,
+              username: true,
               status: true,
-              AdminLog: {
+              UserLog: {
                 select: {
                   id: true,
                   datetime: true,
@@ -271,20 +311,39 @@ class AdminRouter {
                   },
                 },
               },
-              User: {
+              UserInformation: {
                 select: {
                   id: true,
-                  username: true,
-                  status: true,
-                  UserInformation: {
+                  lastname: true,
+                  firstname: true,
+                  middlename: true,
+                  suffix: true,
+                  gender: true,
+                  birthdate: true,
+                  userId: true,
+                  UserInformationLog: {
                     select: {
                       id: true,
-                      lastname: true,
-                      firstname: true,
-                      middlename: true,
-                      suffix: true,
-                      gender: true,
-                      birthdate: true,
+                      datetime: true,
+                      type: true,
+                      content: true,
+                      Operator: {
+                        select: {
+                          id: true,
+                          username: true,
+                          UserInformation: {
+                            select: {
+                              id: true,
+                              lastname: true,
+                              firstname: true,
+                              middlename: true,
+                              suffix: true,
+                              gender: true,
+                              birthdate: true,
+                            },
+                          },
+                        },
+                      },
                     },
                   },
                 },
@@ -293,7 +352,7 @@ class AdminRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} users send to user ${req.body.decodedToken.id}.`
+            `${result.length} users send to supplier ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -318,21 +377,21 @@ class AdminRouter {
       async (req: Request, res: Response) => {
         try {
           console.log(
-            `Updating admin ${
+            `Updating supplier ${
               req.body.id
             } using the following data: ${JSON.stringify(req.body.data)}`
           );
-          let result = await this.prismaService.prisma.admin.update({
+          let result = await this.prismaService.prisma.supplier.update({
             where: { id: req.body.id },
             data: req.body.data,
           });
           if (!result) return res.status(400).send();
-          console.log(`Admin ${req.body.id} updated.`);
+          console.log(`Supplier ${req.body.id} updated.`);
           req.body.data.id = req.body.id;
-          await this.prismaService.prisma.adminLog.create({
+          await this.prismaService.prisma.userLog.create({
             data: {
               type: "update",
-              adminId: req.body.id,
+              userId: req.body.id,
               operatorId: req.body.decodedToken.id,
               content: req.body.data,
             },
@@ -350,4 +409,4 @@ class AdminRouter {
   };
 }
 
-export default AdminRouter;
+export default SupplierRouter;
