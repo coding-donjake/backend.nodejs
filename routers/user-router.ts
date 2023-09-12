@@ -3,20 +3,19 @@ import { Router } from "express";
 import PrismaService from "../services/prisma-service";
 import HashService from "../services/hash-service";
 import AuthenticationService from "../services/authentication-service";
-import LogService from "../services/log-service";
 
 class UserRouter {
   public router: Router;
   private authService: AuthenticationService =
     AuthenticationService.getInstance();
   private hashService: HashService = HashService.getInstance();
-  private logService: LogService = LogService.getInstance();
   private prismaService: PrismaService = PrismaService.getInstance();
 
   private createRoute: string = "/create";
   private getRoute: string = "/get";
   private loginRoute: string = "/login";
   private searchRoute: string = "/search";
+  private selectRoute: string = "/select";
   private updateRoute: string = "/update";
 
   constructor() {
@@ -25,6 +24,7 @@ class UserRouter {
     this.setGetRoute();
     this.setLoginRoute();
     this.setSearchRoute();
+    this.setSelectRoute();
     this.setUpdateRoute();
   }
 
@@ -51,12 +51,14 @@ class UserRouter {
             data: req.body.data,
           });
           console.log(`User created: ${JSON.stringify(user)}`);
-          req.body.data.id = user.id;
-          this.logService.logEvent(
-            "create",
-            req.body.decodedToken.id,
-            req.body.data
-          );
+          await this.prismaService.prisma.userLog.create({
+            data: {
+              type: "create",
+              userId: user.id,
+              operatorId: req.body.decodedToken.id,
+              content: user,
+            },
+          });
           res.status(200).json({ id: user.id });
         } catch (error) {
           console.error(error);
@@ -84,9 +86,37 @@ class UserRouter {
               OR: [{ status: "ok" }, { status: "unverified" }],
             },
             select: {
+              id: true,
               username: true,
+              status: true,
+              UserLog: {
+                select: {
+                  id: true,
+                  datetime: true,
+                  type: true,
+                  content: true,
+                  Operator: {
+                    select: {
+                      id: true,
+                      username: true,
+                      UserInformation: {
+                        select: {
+                          id: true,
+                          lastname: true,
+                          firstname: true,
+                          middlename: true,
+                          suffix: true,
+                          gender: true,
+                          birthdate: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
               UserInformation: {
                 select: {
+                  id: true,
                   lastname: true,
                   firstname: true,
                   middlename: true,
@@ -94,6 +124,31 @@ class UserRouter {
                   gender: true,
                   birthdate: true,
                   userId: true,
+                  UserInformationLog: {
+                    select: {
+                      id: true,
+                      datetime: true,
+                      type: true,
+                      content: true,
+                      Operator: {
+                        select: {
+                          id: true,
+                          username: true,
+                          UserInformation: {
+                            select: {
+                              id: true,
+                              lastname: true,
+                              firstname: true,
+                              middlename: true,
+                              suffix: true,
+                              gender: true,
+                              birthdate: true,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -160,7 +215,34 @@ class UserRouter {
               OR: [{ status: "ok" }, { status: "unverified" }],
             },
             select: {
+              id: true,
               username: true,
+              status: true,
+              UserLog: {
+                select: {
+                  id: true,
+                  datetime: true,
+                  type: true,
+                  content: true,
+                  Operator: {
+                    select: {
+                      id: true,
+                      username: true,
+                      UserInformation: {
+                        select: {
+                          id: true,
+                          lastname: true,
+                          firstname: true,
+                          middlename: true,
+                          suffix: true,
+                          gender: true,
+                          birthdate: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
               UserInformation: {
                 where: {
                   OR: [
@@ -170,12 +252,137 @@ class UserRouter {
                   ],
                 },
                 select: {
+                  id: true,
                   lastname: true,
                   firstname: true,
                   middlename: true,
                   suffix: true,
                   gender: true,
                   birthdate: true,
+                  userId: true,
+                  UserInformationLog: {
+                    select: {
+                      id: true,
+                      datetime: true,
+                      type: true,
+                      content: true,
+                      Operator: {
+                        select: {
+                          id: true,
+                          username: true,
+                          UserInformation: {
+                            select: {
+                              id: true,
+                              lastname: true,
+                              firstname: true,
+                              middlename: true,
+                              suffix: true,
+                              gender: true,
+                              birthdate: true,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          });
+          if (!result) return res.status(400).send();
+          console.log(
+            `${result.length} users send to user ${req.body.decodedToken.id}.`
+          );
+          res.status(200).json({ data: result });
+        } catch (error) {
+          console.error(error);
+          res.status(500).json({
+            status: "server error",
+            msg: error,
+          });
+        }
+      }
+    );
+  };
+
+  private setSelectRoute = async () => {
+    this.router.get(
+      this.getRoute,
+      [
+        this.authService.verifyToken,
+        this.authService.verifyUser,
+        this.authService.verifyAdmin,
+      ],
+      async (req: Request, res: Response) => {
+        try {
+          let result = await this.prismaService.prisma.user.findMany({
+            where: {
+              id: req.body.id,
+            },
+            select: {
+              id: true,
+              username: true,
+              status: true,
+              UserLog: {
+                select: {
+                  id: true,
+                  datetime: true,
+                  type: true,
+                  content: true,
+                  Operator: {
+                    select: {
+                      id: true,
+                      username: true,
+                      UserInformation: {
+                        select: {
+                          id: true,
+                          lastname: true,
+                          firstname: true,
+                          middlename: true,
+                          suffix: true,
+                          gender: true,
+                          birthdate: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              UserInformation: {
+                select: {
+                  id: true,
+                  lastname: true,
+                  firstname: true,
+                  middlename: true,
+                  suffix: true,
+                  gender: true,
+                  birthdate: true,
+                  userId: true,
+                  UserInformationLog: {
+                    select: {
+                      id: true,
+                      datetime: true,
+                      type: true,
+                      content: true,
+                      Operator: {
+                        select: {
+                          id: true,
+                          username: true,
+                          UserInformation: {
+                            select: {
+                              id: true,
+                              lastname: true,
+                              firstname: true,
+                              middlename: true,
+                              suffix: true,
+                              gender: true,
+                              birthdate: true,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -218,11 +425,14 @@ class UserRouter {
           if (!result) return res.status(400).send();
           console.log(`User ${req.body.id} updated.`);
           req.body.data.id = req.body.id;
-          this.logService.logEvent(
-            "update",
-            req.body.decodedToken.id,
-            req.body.data
-          );
+          await this.prismaService.prisma.userLog.create({
+            data: {
+              type: "update",
+              userId: req.body.id,
+              operatorId: req.body.decodedToken.id,
+              content: req.body.data,
+            },
+          });
           res.status(200).send();
         } catch (error) {
           console.error(error);

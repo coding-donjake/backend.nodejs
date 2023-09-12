@@ -11,22 +11,85 @@ datasource db {
 }
 
 model Admin {
-  id     String      @id @default(uuid())
-  role   AdminRole
-  status AdminStatus @default(ok)
-  User   User?       @relation(fields: [userId], references: [id])
-  userId String      @unique
+  id       String      @id @default(uuid())
+  role     AdminRole
+  status   AdminStatus @default(ok)
+  User     User?       @relation(fields: [userId], references: [id])
+  userId   String      @unique
+  AdminLog AdminLog[]
+}
+
+model AdminLog {
+  id         String   @id @default(uuid())
+  datetime   DateTime @default(now())
+  type       String   @db.VarChar(20)
+  content    Json     @db.Json
+  Admin      Admin?   @relation(fields: [adminId], references: [id])
+  adminId    String?
+  Operator   User?    @relation("Operator", fields: [operatorId], references: [id])
+  operatorId String?
+}
+
+model Asset {
+  id        String      @id @default(uuid())
+  name      String      @db.VarChar(255)
+  brand     String      @db.VarChar(255)
+  type      String      @db.VarChar(255)
+  status    AssetStatus @default(good)
+  Borrowing Borrowing[]
+  AssetLog  AssetLog[]
+}
+
+model AssetLog {
+  id         String   @id @default(uuid())
+  datetime   DateTime @default(now())
+  type       String   @db.VarChar(20)
+  content    Json     @db.Json
+  Asset      Asset?   @relation(fields: [assetId], references: [id])
+  assetId    String?
+  Operator   User?    @relation("Operator", fields: [operatorId], references: [id])
+  operatorId String?
+}
+
+model Borrowing {
+  id               String          @id @default(uuid())
+  datetimeBorrowed DateTime
+  datetimeReturned DateTime
+  remarksBorrowed  String          @db.Text
+  remarksReturned  String          @db.Text
+  status           BorrowingStatus @default(pending)
+  Asset            Asset?          @relation(fields: [assetId], references: [id])
+  assetId          String?
+  User             User?           @relation(fields: [userId], references: [id])
+  userId           String?
+  BorrowingLog     BorrowingLog[]
+}
+
+model BorrowingLog {
+  id          String     @id @default(uuid())
+  datetime    DateTime   @default(now())
+  type        String     @db.VarChar(20)
+  content     Json       @db.Json
+  Borrowing   Borrowing? @relation(fields: [borrowingId], references: [id])
+  borrowingId String?
+  Operator    User?      @relation("Operator", fields: [operatorId], references: [id])
+  operatorId  String?
 }
 
 model User {
-  id              String           @id @default(uuid())
-  username        String           @unique @default(uuid())
-  password        String           @db.VarChar(255)
-  status          UserStatus       @default(unverified)
-  UserInformation UserInformation?
-  Admin           Admin?
-  Borrowing       Borrowing[]
-  Log             UserLog[]
+  id                         String               @id @default(uuid())
+  username                   String               @unique @default(uuid())
+  password                   String               @db.VarChar(255)
+  status                     UserStatus           @default(unverified)
+  UserInformation            UserInformation?
+  Admin                      Admin?
+  Borrowing                  Borrowing[]
+  UserLog                    UserLog[]
+  AdminLogOperator           AdminLog[]           @relation("Operator")
+  AssetLogOperator           AssetLog[]           @relation("Operator")
+  BorrowingLogOperator       BorrowingLog[]       @relation("Operator")
+  UserLogOperator            UserLog[]            @relation("Operator")
+  UserInformationLogOperator UserInformationLog[] @relation("Operator")
 }
 
 model UserLog {
@@ -36,42 +99,32 @@ model UserLog {
   content    Json     @db.Json
   User       User?    @relation(fields: [userId], references: [id])
   userId     String?
-  User       User?    @relation(fields: [operatorId], references: [id])
+  Operator   User?    @relation("Operator", fields: [operatorId], references: [id])
   operatorId String?
 }
 
 model UserInformation {
-  id         String   @id @default(uuid())
-  lastname   String   @db.VarChar(255)
-  firstname  String   @db.VarChar(255)
-  middlename String   @db.VarChar(255)
-  suffix     String   @db.VarChar(20)
-  gender     Gender
-  birthdate  DateTime @db.Date
-  User       User?    @relation(fields: [userId], references: [id])
-  userId     String   @unique
+  id                 String               @id @default(uuid())
+  lastname           String               @db.VarChar(255)
+  firstname          String               @db.VarChar(255)
+  middlename         String               @db.VarChar(255)
+  suffix             String               @db.VarChar(20)
+  gender             Gender
+  birthdate          DateTime             @db.Date
+  User               User?                @relation(fields: [userId], references: [id])
+  userId             String               @unique
+  UserInformationLog UserInformationLog[]
 }
 
-model Asset {
-  id        String      @id @default(uuid())
-  name      String      @db.VarChar(255)
-  brand     String      @db.VarChar(255)
-  type      String      @db.VarChar(255)
-  status    AssetStatus
-  Borrowing Borrowing[]
-}
-
-model Borrowing {
-  id               String          @id @default(uuid())
-  datetimeBorrowed DateTime
-  datetimeReturned DateTime
-  remarksBorrowed  String          @db.Text
-  remarksReturned  String          @db.Text
-  status           BorrowingStatus
-  Asset            Asset?          @relation(fields: [assetId], references: [id])
-  assetId          String?
-  User             User?           @relation(fields: [userId], references: [id])
-  userId           String?
+model UserInformationLog {
+  id                String           @id @default(uuid())
+  datetime          DateTime         @default(now())
+  type              String           @db.VarChar(20)
+  content           Json             @db.Json
+  UserInformation   UserInformation? @relation(fields: [userInformationId], references: [id])
+  userInformationId String?
+  Operator          User?            @relation("Operator", fields: [operatorId], references: [id])
+  operatorId        String?
 }
 
 enum AdminRole {

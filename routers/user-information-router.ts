@@ -2,13 +2,11 @@ import { Request, Response } from "express";
 import { Router } from "express";
 import PrismaService from "../services/prisma-service";
 import AuthenticationService from "../services/authentication-service";
-import LogService from "../services/log-service";
 
 class UserInformationRouter {
   public router: Router;
   private authService: AuthenticationService =
     AuthenticationService.getInstance();
-  private logService: LogService = LogService.getInstance();
   private prismaService: PrismaService = PrismaService.getInstance();
 
   private createRoute: string = "/create";
@@ -42,12 +40,14 @@ class UserInformationRouter {
           console.log(
             `User information created: ${JSON.stringify(userInformation)}`
           );
-          req.body.data.id = userInformation.id;
-          this.logService.logEvent(
-            "create",
-            req.body.decodedToken.id,
-            req.body.data
-          );
+          await this.prismaService.prisma.userInformationLog.create({
+            data: {
+              type: "create",
+              userInformationId: userInformation.id,
+              operatorId: req.body.decodedToken.id,
+              content: userInformation,
+            },
+          });
           res.status(200).json({ id: userInformation.id });
         } catch (error) {
           console.error(error);
@@ -82,11 +82,14 @@ class UserInformationRouter {
           if (!result) return res.status(400).send();
           console.log(`User ${req.body.id} updated.`);
           req.body.data.id = req.body.id;
-          this.logService.logEvent(
-            "update",
-            req.body.decodedToken.id,
-            req.body.data
-          );
+          await this.prismaService.prisma.userInformationLog.create({
+            data: {
+              type: "update",
+              userInformationId: req.body.id,
+              operatorId: req.body.decodedToken.id,
+              content: req.body.data,
+            },
+          });
           res.status(200).send();
         } catch (error) {
           console.error(error);
