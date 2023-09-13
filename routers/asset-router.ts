@@ -112,7 +112,7 @@ class AssetRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} assets send to asset ${req.body.decodedToken.id}.`
+            `${result.length} assets send to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -184,7 +184,7 @@ class AssetRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} assets send to asset ${req.body.decodedToken.id}.`
+            `${result.length} assets send to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -247,7 +247,7 @@ class AssetRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} assets send to asset ${req.body.decodedToken.id}.`
+            `${result.length} assets send to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
