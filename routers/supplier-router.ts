@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { Router } from "express";
 import PrismaService from "../services/prisma-service";
-import HashService from "../services/hash-service";
 import AuthenticationService from "../services/authentication-service";
 
 class SupplierRouter {
