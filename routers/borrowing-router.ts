@@ -1,19 +1,16 @@
 import { Request, Response } from "express";
 import { Router } from "express";
 import PrismaService from "../services/prisma-service";
-import HashService from "../services/hash-service";
 import AuthenticationService from "../services/authentication-service";
 
 class BorrowingRouter {
   public router: Router;
   private authService: AuthenticationService =
     AuthenticationService.getInstance();
-  private hashService: HashService = HashService.getInstance();
   private prismaService: PrismaService = PrismaService.getInstance();
 
   private createRoute: string = "/create";
   private getRoute: string = "/get";
-  private loginRoute: string = "/login";
   private searchRoute: string = "/search";
   private selectRoute: string = "/select";
   private updateRoute: string = "/update";
@@ -22,7 +19,6 @@ class BorrowingRouter {
     this.router = Router();
     this.setCreateRoute();
     this.setGetRoute();
-    this.setLoginRoute();
     this.setSearchRoute();
     this.setSelectRoute();
     this.setUpdateRoute();
@@ -37,10 +33,6 @@ class BorrowingRouter {
         this.authService.verifyAdmin,
       ],
       async (req: Request, res: Response) => {
-        req.body.data.password = await this.hashService.hashPassword(
-          req.body.data.password,
-          10
-        );
         try {
           console.log(
             `Creating borrowing using the following data: ${JSON.stringify(
@@ -153,7 +145,7 @@ class BorrowingRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} borrowing send to borrowing ${req.body.decodedToken.id}.`
+            `${result.length} borrowing send to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -165,37 +157,6 @@ class BorrowingRouter {
         }
       }
     );
-  };
-
-  private setLoginRoute = async () => {
-    this.router.post(this.loginRoute, async (req: Request, res: Response) => {
-      try {
-        console.log(`Login attempt using ${req.body.username}`);
-        const { username, password } = req.body;
-        const borrowing = await this.authService.authenticateUser(
-          username,
-          password
-        );
-        if (!borrowing) {
-          res.status(401).send();
-          return;
-        }
-        console.log(`Borrowing ${username} successfully logged in.`);
-        res.status(200).json({
-          accessToken: this.authService.generateAccessToken(
-            borrowing,
-            process.env.TOKEN_DURATION!
-          ),
-          refreshToken: this.authService.generateRefreshToken(borrowing),
-        });
-      } catch (error) {
-        console.error(error);
-        res.status(500).json({
-          status: "server error",
-          msg: error,
-        });
-      }
-    });
   };
 
   private setSearchRoute = async () => {
@@ -211,23 +172,40 @@ class BorrowingRouter {
           let result = await this.prismaService.prisma.borrowing.findMany({
             where: {
               AND: [
-                { OR: [{ status: "good" }, { status: "broken" }] },
                 {
                   OR: [
-                    { name: req.body.key },
-                    { brand: req.body.key },
-                    { type: req.body.key },
+                    { status: "pending" },
+                    { status: "active" },
+                    { status: "completed" },
+                    { status: "declined" },
+                  ],
+                },
+                {
+                  OR: [
+                    {
+                      datetimeBorrowed: {
+                        gte: req.body.datetimeBorrowed.start,
+                        lte: req.body.datetimeBorrowed.end,
+                      },
+                    },
+                    {
+                      datetimeReturned: {
+                        gte: req.body.datetimeReturned.start,
+                        lte: req.body.datetimeReturned.end,
+                      },
+                    },
                   ],
                 },
               ],
             },
             select: {
               id: true,
-              name: true,
-              brand: true,
-              type: true,
+              datetimeBorrowed: true,
+              datetimeReturned: true,
+              remarksBorrowed: true,
+              remarksReturned: true,
               status: true,
-              AssetLog: {
+              BorrowingLog: {
                 select: {
                   id: true,
                   datetime: true,
@@ -252,11 +230,38 @@ class BorrowingRouter {
                   },
                 },
               },
+              Asset: {
+                select: {
+                  id: true,
+                  name: true,
+                  brand: true,
+                  type: true,
+                  status: true,
+                },
+              },
+              User: {
+                select: {
+                  id: true,
+                  username: true,
+                  status: true,
+                  UserInformation: {
+                    select: {
+                      id: true,
+                      lastname: true,
+                      firstname: true,
+                      middlename: true,
+                      suffix: true,
+                      gender: true,
+                      birthdate: true,
+                    },
+                  },
+                },
+              },
             },
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} borrowing send to borrowing ${req.body.decodedToken.id}.`
+            `${result.length} borrowing send to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -286,11 +291,12 @@ class BorrowingRouter {
             },
             select: {
               id: true,
-              name: true,
-              brand: true,
-              type: true,
+              datetimeBorrowed: true,
+              datetimeReturned: true,
+              remarksBorrowed: true,
+              remarksReturned: true,
               status: true,
-              AssetLog: {
+              BorrowingLog: {
                 select: {
                   id: true,
                   datetime: true,
@@ -315,11 +321,38 @@ class BorrowingRouter {
                   },
                 },
               },
+              Asset: {
+                select: {
+                  id: true,
+                  name: true,
+                  brand: true,
+                  type: true,
+                  status: true,
+                },
+              },
+              User: {
+                select: {
+                  id: true,
+                  username: true,
+                  status: true,
+                  UserInformation: {
+                    select: {
+                      id: true,
+                      lastname: true,
+                      firstname: true,
+                      middlename: true,
+                      suffix: true,
+                      gender: true,
+                      birthdate: true,
+                    },
+                  },
+                },
+              },
             },
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} borrowing send to borrowing ${req.body.decodedToken.id}.`
+            `${result.length} borrowing send to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {

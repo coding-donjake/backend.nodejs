@@ -1,19 +1,16 @@
 import { Request, Response } from "express";
 import { Router } from "express";
 import PrismaService from "../services/prisma-service";
-import HashService from "../services/hash-service";
 import AuthenticationService from "../services/authentication-service";
 
 class AssetRouter {
   public router: Router;
   private authService: AuthenticationService =
     AuthenticationService.getInstance();
-  private hashService: HashService = HashService.getInstance();
   private prismaService: PrismaService = PrismaService.getInstance();
 
   private createRoute: string = "/create";
   private getRoute: string = "/get";
-  private loginRoute: string = "/login";
   private searchRoute: string = "/search";
   private selectRoute: string = "/select";
   private updateRoute: string = "/update";
@@ -22,7 +19,6 @@ class AssetRouter {
     this.router = Router();
     this.setCreateRoute();
     this.setGetRoute();
-    this.setLoginRoute();
     this.setSearchRoute();
     this.setSelectRoute();
     this.setUpdateRoute();
@@ -37,10 +33,6 @@ class AssetRouter {
         this.authService.verifyAdmin,
       ],
       async (req: Request, res: Response) => {
-        req.body.data.password = await this.hashService.hashPassword(
-          req.body.data.password,
-          10
-        );
         try {
           console.log(
             `Creating asset using the following data: ${JSON.stringify(
@@ -132,37 +124,6 @@ class AssetRouter {
         }
       }
     );
-  };
-
-  private setLoginRoute = async () => {
-    this.router.post(this.loginRoute, async (req: Request, res: Response) => {
-      try {
-        console.log(`Login attempt using ${req.body.username}`);
-        const { username, password } = req.body;
-        const asset = await this.authService.authenticateUser(
-          username,
-          password
-        );
-        if (!asset) {
-          res.status(401).send();
-          return;
-        }
-        console.log(`Asset ${username} successfully logged in.`);
-        res.status(200).json({
-          accessToken: this.authService.generateAccessToken(
-            asset,
-            process.env.TOKEN_DURATION!
-          ),
-          refreshToken: this.authService.generateRefreshToken(asset),
-        });
-      } catch (error) {
-        console.error(error);
-        res.status(500).json({
-          status: "server error",
-          msg: error,
-        });
-      }
-    });
   };
 
   private setSearchRoute = async () => {
