@@ -166,7 +166,7 @@ class EventRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} events send to user ${req.body.decodedToken.id}.`
+            `${result.length} events sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -303,7 +303,7 @@ class EventRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} events send to user ${req.body.decodedToken.id}.`
+            `${result.length} events sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -415,7 +415,7 @@ class EventRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} events send to user ${req.body.decodedToken.id}.`
+            `${result.length} events sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {

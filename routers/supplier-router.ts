@@ -113,7 +113,7 @@ class SupplierRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} suppliers send to supplier ${req.body.decodedToken.id}.`
+            `${result.length} suppliers sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -188,7 +188,7 @@ class SupplierRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} suppliers send to supplier ${req.body.decodedToken.id}.`
+            `${result.length} suppliers sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -252,7 +252,7 @@ class SupplierRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} suppliers send to supplier ${req.body.decodedToken.id}.`
+            `${result.length} suppliers sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {

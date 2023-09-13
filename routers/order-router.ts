@@ -146,7 +146,7 @@ class OrderRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} orders send to user ${req.body.decodedToken.id}.`
+            `${result.length} orders sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -269,7 +269,7 @@ class OrderRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} orders send to user ${req.body.decodedToken.id}.`
+            `${result.length} orders sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -362,7 +362,7 @@ class OrderRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} orders send to user ${req.body.decodedToken.id}.`
+            `${result.length} orders sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {

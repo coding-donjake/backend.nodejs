@@ -140,7 +140,7 @@ class TaskRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} tasks send to task ${req.body.decodedToken.id}.`
+            `${result.length} tasks sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -248,7 +248,7 @@ class TaskRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} tasks send to task ${req.body.decodedToken.id}.`
+            `${result.length} tasks sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -335,7 +335,7 @@ class TaskRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} tasks send to task ${req.body.decodedToken.id}.`
+            `${result.length} tasks sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {

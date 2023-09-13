@@ -127,7 +127,7 @@ class CustomerRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} customers send to user ${req.body.decodedToken.id}.`
+            `${result.length} customers sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -215,7 +215,7 @@ class CustomerRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} customers send to user ${req.body.decodedToken.id}.`
+            `${result.length} customers sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -293,7 +293,7 @@ class CustomerRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} customers send to user ${req.body.decodedToken.id}.`
+            `${result.length} customers sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
