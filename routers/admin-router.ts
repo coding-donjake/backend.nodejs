@@ -128,7 +128,7 @@ class AdminRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} admins send to user ${req.body.decodedToken.id}.`
+            `${result.length} admins sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -214,7 +214,7 @@ class AdminRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} admins send to user ${req.body.decodedToken.id}.`
+            `${result.length} admins sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -293,7 +293,7 @@ class AdminRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} admins send to user ${req.body.decodedToken.id}.`
+            `${result.length} admins sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
