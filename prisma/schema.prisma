@@ -30,52 +30,6 @@ model AdminLog {
   operatorId String?
 }
 
-model Asset {
-  id        String      @id @default(uuid())
-  name      String      @db.VarChar(255)
-  brand     String      @db.VarChar(255)
-  type      String      @db.VarChar(255)
-  status    AssetStatus @default(good)
-  Borrowing Borrowing[]
-  AssetLog  AssetLog[]
-}
-
-model AssetLog {
-  id         String   @id @default(uuid())
-  datetime   DateTime @default(now())
-  type       String   @db.VarChar(20)
-  content    Json     @db.Json
-  Asset      Asset?   @relation(fields: [assetId], references: [id])
-  assetId    String?
-  Operator   User?    @relation("Operator", fields: [operatorId], references: [id])
-  operatorId String?
-}
-
-model Borrowing {
-  id               String          @id @default(uuid())
-  datetimeBorrowed DateTime
-  datetimeReturned DateTime
-  remarksBorrowed  String          @db.Text
-  remarksReturned  String          @db.Text
-  status           BorrowingStatus @default(pending)
-  Asset            Asset?          @relation(fields: [assetId], references: [id])
-  assetId          String?
-  User             User?           @relation(fields: [userId], references: [id])
-  userId           String?
-  BorrowingLog     BorrowingLog[]
-}
-
-model BorrowingLog {
-  id          String     @id @default(uuid())
-  datetime    DateTime   @default(now())
-  type        String     @db.VarChar(20)
-  content     Json       @db.Json
-  Borrowing   Borrowing? @relation(fields: [borrowingId], references: [id])
-  borrowingId String?
-  Operator    User?      @relation("Operator", fields: [operatorId], references: [id])
-  operatorId  String?
-}
-
 model User {
   id                         String               @id @default(uuid())
   username                   String               @unique @default(uuid())
@@ -83,11 +37,8 @@ model User {
   status                     UserStatus           @default(unverified)
   UserInformation            UserInformation?
   Admin                      Admin?
-  Borrowing                  Borrowing[]
   UserLog                    UserLog[]
   AdminLogOperator           AdminLog[]           @relation("Operator")
-  AssetLogOperator           AssetLog[]           @relation("Operator")
-  BorrowingLogOperator       BorrowingLog[]       @relation("Operator")
   UserLogOperator            UserLog[]            @relation("Operator")
   UserInformationLogOperator UserInformationLog[] @relation("Operator")
 }
@@ -135,18 +86,6 @@ enum AdminRole {
 enum AdminStatus {
   ok
   removed
-}
-
-enum AssetStatus {
-  good
-  broken
-  removed
-}
-
-enum BorrowingStatus {
-  pending
-  borrowed
-  returned
 }
 
 enum Gender {
