@@ -191,10 +191,12 @@ model OrderSupplyLog {
 }
 
 model Task {
-  id      String     @id @default(uuid())
-  name    String     @db.VarChar(255)
-  status  TaskStatus @default(active)
-  TaskLog TaskLog[]
+  id               String         @id @default(uuid())
+  datetimeDeadline DateTime
+  name             String         @db.VarChar(255)
+  status           TaskStatus     @default(active)
+  TaskLog          TaskLog[]
+  TaskAssignee     TaskAssignee[]
 }
 
 model TaskLog {
@@ -208,6 +210,27 @@ model TaskLog {
   operatorId String?
 }
 
+model TaskAssignee {
+  id              String             @id @default(uuid())
+  status          TaskAssigneeStatus
+  Task            Task?              @relation(fields: [taskId], references: [id])
+  taskId          String?
+  User            User?              @relation(fields: [userId], references: [id])
+  userId          String?
+  TaskAssigneeLog TaskAssigneeLog[]
+}
+
+model TaskAssigneeLog {
+  id             String        @id @default(uuid())
+  datetime       DateTime      @default(now())
+  type           String        @db.VarChar(20)
+  content        Json          @db.Json
+  TaskAssignee   TaskAssignee? @relation(fields: [taskAssigneeId], references: [id])
+  taskAssigneeId String?
+  Operator       User?         @relation("Operator", fields: [operatorId], references: [id])
+  operatorId     String?
+}
+
 model User {
   id                         String               @id @default(uuid())
   username                   String               @unique @default(uuid())
@@ -216,6 +239,7 @@ model User {
   UserInformation            UserInformation?
   Admin                      Admin?
   Customer                   Customer?
+  TaskAssignee               TaskAssignee[]
   UserLog                    UserLog[]
   AdminLogOperator           AdminLog[]           @relation("Operator")
   CustomerLogOperator        CustomerLog[]        @relation("Operator")
@@ -226,6 +250,7 @@ model User {
   OrderLogOperator           OrderLog[]           @relation("Operator")
   OrderSupplyLogOperator     OrderSupplyLog[]     @relation("Operator")
   TaskLogOperator            TaskLog[]            @relation("Operator")
+  TaskAssigneeLogOperator    TaskAssigneeLog[]    @relation("Operator")
   UserLogOperator            UserLog[]            @relation("Operator")
   UserInformationLogOperator UserInformationLog[] @relation("Operator")
 }
@@ -326,6 +351,11 @@ enum TaskStatus {
   active
   completed
   onhold
+  removed
+}
+
+enum TaskAssigneeStatus {
+  ok
   removed
 }
 

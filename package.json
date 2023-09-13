@@ -10,7 +10,7 @@
     "migrate:seed": "ts-node prisma/seed.ts",
     "migrate:update": "npx prisma migrate dev --name update",
     "dev": "nodemon",
-    "setup": "npm run migrate:deploy && npm run migrate:seed",
+    "setup": "npm run migrate:deploy && npm run migrate:generate && npm run migrate:seed",
     "start": "ts-node"
   },
   "keywords": [],

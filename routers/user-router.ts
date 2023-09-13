@@ -72,7 +72,7 @@ class UserRouter {
   };
 
   private setGetRoute = async () => {
-    this.router.get(
+    this.router.post(
       this.getRoute,
       [
         this.authService.verifyToken,
@@ -123,7 +123,6 @@ class UserRouter {
                   suffix: true,
                   gender: true,
                   birthdate: true,
-                  userId: true,
                   UserInformationLog: {
                     select: {
                       id: true,
@@ -201,7 +200,7 @@ class UserRouter {
   };
 
   private setSearchRoute = async () => {
-    this.router.get(
+    this.router.post(
       this.searchRoute,
       [
         this.authService.verifyToken,
@@ -259,7 +258,6 @@ class UserRouter {
                   suffix: true,
                   gender: true,
                   birthdate: true,
-                  userId: true,
                   UserInformationLog: {
                     select: {
                       id: true,
@@ -306,7 +304,7 @@ class UserRouter {
   };
 
   private setSelectRoute = async () => {
-    this.router.get(
+    this.router.post(
       this.selectRoute,
       [
         this.authService.verifyToken,
@@ -357,7 +355,6 @@ class UserRouter {
                   suffix: true,
                   gender: true,
                   birthdate: true,
-                  userId: true,
                   UserInformationLog: {
                     select: {
                       id: true,

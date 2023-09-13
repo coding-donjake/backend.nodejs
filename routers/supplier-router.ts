@@ -8,7 +8,6 @@ class SupplierRouter {
   public router: Router;
   private authService: AuthenticationService =
     AuthenticationService.getInstance();
-  private hashService: HashService = HashService.getInstance();
   private prismaService: PrismaService = PrismaService.getInstance();
 
   private createRoute: string = "/create";
@@ -45,10 +44,10 @@ class SupplierRouter {
             data: req.body.data,
           });
           console.log(`Supplier created: ${JSON.stringify(supplier)}`);
-          await this.prismaService.prisma.userLog.create({
+          await this.prismaService.prisma.supplierLog.create({
             data: {
               type: "create",
-              userId: supplier.id,
+              supplierId: supplier.id,
               operatorId: req.body.decodedToken.id,
               content: supplier,
             },
@@ -66,7 +65,7 @@ class SupplierRouter {
   };
 
   private setGetRoute = async () => {
-    this.router.get(
+    this.router.post(
       this.getRoute,
       [
         this.authService.verifyToken,
@@ -77,13 +76,16 @@ class SupplierRouter {
         try {
           let result = await this.prismaService.prisma.supplier.findMany({
             where: {
-              OR: [{ status: "ok" }, { status: "unverified" }],
+              OR: [{ status: "ok" }, { status: "flagged" }],
             },
             select: {
               id: true,
-              username: true,
+              name: true,
+              address: true,
+              phone: true,
+              email: true,
               status: true,
-              UserLog: {
+              SupplierLog: {
                 select: {
                   id: true,
                   datetime: true,
@@ -108,48 +110,11 @@ class SupplierRouter {
                   },
                 },
               },
-              UserInformation: {
-                select: {
-                  id: true,
-                  lastname: true,
-                  firstname: true,
-                  middlename: true,
-                  suffix: true,
-                  gender: true,
-                  birthdate: true,
-                  userId: true,
-                  UserInformationLog: {
-                    select: {
-                      id: true,
-                      datetime: true,
-                      type: true,
-                      content: true,
-                      Operator: {
-                        select: {
-                          id: true,
-                          username: true,
-                          UserInformation: {
-                            select: {
-                              id: true,
-                              lastname: true,
-                              firstname: true,
-                              middlename: true,
-                              suffix: true,
-                              gender: true,
-                              birthdate: true,
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
             },
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} users send to supplier ${req.body.decodedToken.id}.`
+            `${result.length} suppliers send to supplier ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -164,7 +129,7 @@ class SupplierRouter {
   };
 
   private setSearchRoute = async () => {
-    this.router.get(
+    this.router.post(
       this.searchRoute,
       [
         this.authService.verifyToken,
@@ -175,13 +140,27 @@ class SupplierRouter {
         try {
           let result = await this.prismaService.prisma.supplier.findMany({
             where: {
-              OR: [{ status: "ok" }, { status: "unverified" }],
+              AND: [
+                { OR: [{ status: "ok" }, { status: "flagged" }] },
+                {
+                  OR: [
+                    { name: req.body.key },
+                    { address: req.body.key },
+                    { phone: req.body.key },
+                    { email: req.body.key },
+                    { status: req.body.key },
+                  ],
+                },
+              ],
             },
             select: {
               id: true,
-              username: true,
+              name: true,
+              address: true,
+              phone: true,
+              email: true,
               status: true,
-              UserLog: {
+              SupplierLog: {
                 select: {
                   id: true,
                   datetime: true,
@@ -206,55 +185,11 @@ class SupplierRouter {
                   },
                 },
               },
-              UserInformation: {
-                where: {
-                  OR: [
-                    { lastname: req.body.key },
-                    { firstname: req.body.key },
-                    { middlename: req.body.key },
-                  ],
-                },
-                select: {
-                  id: true,
-                  lastname: true,
-                  firstname: true,
-                  middlename: true,
-                  suffix: true,
-                  gender: true,
-                  birthdate: true,
-                  userId: true,
-                  UserInformationLog: {
-                    select: {
-                      id: true,
-                      datetime: true,
-                      type: true,
-                      content: true,
-                      Operator: {
-                        select: {
-                          id: true,
-                          username: true,
-                          UserInformation: {
-                            select: {
-                              id: true,
-                              lastname: true,
-                              firstname: true,
-                              middlename: true,
-                              suffix: true,
-                              gender: true,
-                              birthdate: true,
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
             },
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} users send to supplier ${req.body.decodedToken.id}.`
+            `${result.length} suppliers send to supplier ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -269,7 +204,7 @@ class SupplierRouter {
   };
 
   private setSelectRoute = async () => {
-    this.router.get(
+    this.router.post(
       this.selectRoute,
       [
         this.authService.verifyToken,
@@ -284,9 +219,12 @@ class SupplierRouter {
             },
             select: {
               id: true,
-              username: true,
+              name: true,
+              address: true,
+              phone: true,
+              email: true,
               status: true,
-              UserLog: {
+              SupplierLog: {
                 select: {
                   id: true,
                   datetime: true,
@@ -311,48 +249,11 @@ class SupplierRouter {
                   },
                 },
               },
-              UserInformation: {
-                select: {
-                  id: true,
-                  lastname: true,
-                  firstname: true,
-                  middlename: true,
-                  suffix: true,
-                  gender: true,
-                  birthdate: true,
-                  userId: true,
-                  UserInformationLog: {
-                    select: {
-                      id: true,
-                      datetime: true,
-                      type: true,
-                      content: true,
-                      Operator: {
-                        select: {
-                          id: true,
-                          username: true,
-                          UserInformation: {
-                            select: {
-                              id: true,
-                              lastname: true,
-                              firstname: true,
-                              middlename: true,
-                              suffix: true,
-                              gender: true,
-                              birthdate: true,
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
             },
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} users send to supplier ${req.body.decodedToken.id}.`
+            `${result.length} suppliers send to supplier ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -388,10 +289,10 @@ class SupplierRouter {
           if (!result) return res.status(400).send();
           console.log(`Supplier ${req.body.id} updated.`);
           req.body.data.id = req.body.id;
-          await this.prismaService.prisma.userLog.create({
+          await this.prismaService.prisma.supplierLog.create({
             data: {
               type: "update",
-              userId: req.body.id,
+              supplierId: req.body.id,
               operatorId: req.body.decodedToken.id,
               content: req.body.data,
             },

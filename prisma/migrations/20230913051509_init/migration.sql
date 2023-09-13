@@ -193,6 +193,7 @@ CREATE TABLE `OrderSupplyLog` (
 -- CreateTable
 CREATE TABLE `Task` (
     `id` VARCHAR(191) NOT NULL,
+    `datetimeDeadline` DATETIME(3) NOT NULL,
     `name` VARCHAR(255) NOT NULL,
     `status` ENUM('active', 'completed', 'onhold', 'removed') NOT NULL DEFAULT 'active',
 
@@ -206,6 +207,28 @@ CREATE TABLE `TaskLog` (
     `type` VARCHAR(20) NOT NULL,
     `content` JSON NOT NULL,
     `taskId` VARCHAR(191) NULL,
+    `operatorId` VARCHAR(191) NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `TaskAssignee` (
+    `id` VARCHAR(191) NOT NULL,
+    `status` ENUM('ok', 'removed') NOT NULL,
+    `taskId` VARCHAR(191) NULL,
+    `userId` VARCHAR(191) NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `TaskAssigneeLog` (
+    `id` VARCHAR(191) NOT NULL,
+    `datetime` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `type` VARCHAR(20) NOT NULL,
+    `content` JSON NOT NULL,
+    `taskAssigneeId` VARCHAR(191) NULL,
     `operatorId` VARCHAR(191) NULL,
 
     PRIMARY KEY (`id`)
@@ -338,6 +361,18 @@ ALTER TABLE `TaskLog` ADD CONSTRAINT `TaskLog_taskId_fkey` FOREIGN KEY (`taskId`
 
 -- AddForeignKey
 ALTER TABLE `TaskLog` ADD CONSTRAINT `TaskLog_operatorId_fkey` FOREIGN KEY (`operatorId`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `TaskAssignee` ADD CONSTRAINT `TaskAssignee_taskId_fkey` FOREIGN KEY (`taskId`) REFERENCES `Task`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `TaskAssignee` ADD CONSTRAINT `TaskAssignee_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `TaskAssigneeLog` ADD CONSTRAINT `TaskAssigneeLog_taskAssigneeId_fkey` FOREIGN KEY (`taskAssigneeId`) REFERENCES `TaskAssignee`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `TaskAssigneeLog` ADD CONSTRAINT `TaskAssigneeLog_operatorId_fkey` FOREIGN KEY (`operatorId`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `UserLog` ADD CONSTRAINT `UserLog_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;

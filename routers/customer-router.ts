@@ -64,7 +64,7 @@ class CustomerRouter {
   };
 
   private setGetRoute = async () => {
-    this.router.get(
+    this.router.post(
       this.getRoute,
       [
         this.authService.verifyToken,
@@ -127,7 +127,7 @@ class CustomerRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} users send to user ${req.body.decodedToken.id}.`
+            `${result.length} customers send to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -142,7 +142,7 @@ class CustomerRouter {
   };
 
   private setSearchRoute = async () => {
-    this.router.get(
+    this.router.post(
       this.searchRoute,
       [
         this.authService.verifyToken,
@@ -215,7 +215,7 @@ class CustomerRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} users send to user ${req.body.decodedToken.id}.`
+            `${result.length} customers send to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -230,7 +230,7 @@ class CustomerRouter {
   };
 
   private setSelectRoute = async () => {
-    this.router.get(
+    this.router.post(
       this.selectRoute,
       [
         this.authService.verifyToken,
@@ -293,7 +293,7 @@ class CustomerRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} users send to user ${req.body.decodedToken.id}.`
+            `${result.length} customers send to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {

@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
 import { Router } from "express";
-import AuthenticationService from "../services/authentication-service";
 import PrismaService from "../services/prisma-service";
+import HashService from "../services/hash-service";
+import AuthenticationService from "../services/authentication-service";
 
-class EventRouter {
+class TaskRouter {
   public router: Router;
   private authService: AuthenticationService =
     AuthenticationService.getInstance();
@@ -35,23 +36,23 @@ class EventRouter {
       async (req: Request, res: Response) => {
         try {
           console.log(
-            `Creating event using the following data: ${JSON.stringify(
+            `Creating task using the following data: ${JSON.stringify(
               req.body.data
             )}`
           );
-          const event = await this.prismaService.prisma.event.create({
+          const task = await this.prismaService.prisma.task.create({
             data: req.body.data,
           });
-          console.log(`Event created: ${JSON.stringify(event)}`);
-          await this.prismaService.prisma.eventLog.create({
+          console.log(`Task created: ${JSON.stringify(task)}`);
+          await this.prismaService.prisma.taskLog.create({
             data: {
               type: "create",
-              eventId: event.id,
+              taskId: task.id,
               operatorId: req.body.decodedToken.id,
-              content: event,
+              content: task,
             },
           });
-          res.status(200).json({ id: event.id });
+          res.status(200).json({ id: task.id });
         } catch (error) {
           console.error(error);
           res.status(500).json({
@@ -73,24 +74,20 @@ class EventRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.event.findMany({
+          let result = await this.prismaService.prisma.task.findMany({
             where: {
               OR: [
                 { status: "active" },
-                { status: "cancelled" },
                 { status: "completed" },
-                { status: "unpaid" },
+                { status: "onhold" },
               ],
             },
             select: {
               id: true,
-              datetimeStart: true,
-              datetimeEnd: true,
-              type: true,
+              datetimeDeadline: true,
               name: true,
-              address: true,
               status: true,
-              EventLog: {
+              TaskLog: {
                 select: {
                   id: true,
                   datetime: true,
@@ -115,13 +112,11 @@ class EventRouter {
                   },
                 },
               },
-              Customer: {
+              TaskAssignee: {
+                where: {
+                  status: "ok",
+                },
                 select: {
-                  id: true,
-                  address: true,
-                  phone: true,
-                  email: true,
-                  status: true,
                   User: {
                     select: {
                       id: true,
@@ -142,31 +137,11 @@ class EventRouter {
                   },
                 },
               },
-              EventSupply: {
-                where: {
-                  status: "ok",
-                },
-                select: {
-                  id: true,
-                  quantity: true,
-                  status: true,
-                  Supply: {
-                    select: {
-                      id: true,
-                      name: true,
-                      brand: true,
-                      type: true,
-                      stock: true,
-                      status: true,
-                    },
-                  },
-                },
-              },
             },
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} events send to user ${req.body.decodedToken.id}.`
+            `${result.length} tasks send to task ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -190,30 +165,26 @@ class EventRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.event.findMany({
+          let result = await this.prismaService.prisma.task.findMany({
             where: {
               AND: [
                 {
                   OR: [
                     { status: "active" },
-                    { status: "cancelled" },
                     { status: "completed" },
-                    { status: "unpaid" },
+                    { status: "onhold" },
                   ],
                 },
                 {
                   OR: [
                     {
-                      datetimeStart: {
-                        gte: req.body.datetimeStart.start,
-                        lte: req.body.datetimeStart.end,
+                      datetimeDeadline: {
+                        gte: req.body.datetimeDeadline.start,
+                        lte: req.body.datetimeDeadline.end,
                       },
                     },
                     {
-                      datetimeEnd: {
-                        gte: req.body.datetimeEnd.start,
-                        lte: req.body.datetimeEnd.end,
-                      },
+                      name: req.body.key,
                     },
                   ],
                 },
@@ -221,13 +192,10 @@ class EventRouter {
             },
             select: {
               id: true,
-              datetimeStart: true,
-              datetimeEnd: true,
-              type: true,
+              datetimeDeadline: true,
               name: true,
-              address: true,
               status: true,
-              EventLog: {
+              TaskLog: {
                 select: {
                   id: true,
                   datetime: true,
@@ -252,13 +220,11 @@ class EventRouter {
                   },
                 },
               },
-              Customer: {
+              TaskAssignee: {
+                where: {
+                  status: "ok",
+                },
                 select: {
-                  id: true,
-                  address: true,
-                  phone: true,
-                  email: true,
-                  status: true,
                   User: {
                     select: {
                       id: true,
@@ -279,31 +245,11 @@ class EventRouter {
                   },
                 },
               },
-              EventSupply: {
-                where: {
-                  status: "ok",
-                },
-                select: {
-                  id: true,
-                  quantity: true,
-                  status: true,
-                  Supply: {
-                    select: {
-                      id: true,
-                      name: true,
-                      brand: true,
-                      type: true,
-                      stock: true,
-                      status: true,
-                    },
-                  },
-                },
-              },
             },
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} events send to user ${req.body.decodedToken.id}.`
+            `${result.length} tasks send to task ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -327,19 +273,16 @@ class EventRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.event.findMany({
+          let result = await this.prismaService.prisma.task.findMany({
             where: {
               id: req.body.id,
             },
             select: {
               id: true,
-              datetimeStart: true,
-              datetimeEnd: true,
-              type: true,
+              datetimeDeadline: true,
               name: true,
-              address: true,
               status: true,
-              EventLog: {
+              TaskLog: {
                 select: {
                   id: true,
                   datetime: true,
@@ -364,13 +307,11 @@ class EventRouter {
                   },
                 },
               },
-              Customer: {
+              TaskAssignee: {
+                where: {
+                  status: "ok",
+                },
                 select: {
-                  id: true,
-                  address: true,
-                  phone: true,
-                  email: true,
-                  status: true,
                   User: {
                     select: {
                       id: true,
@@ -391,31 +332,11 @@ class EventRouter {
                   },
                 },
               },
-              EventSupply: {
-                where: {
-                  status: "ok",
-                },
-                select: {
-                  id: true,
-                  quantity: true,
-                  status: true,
-                  Supply: {
-                    select: {
-                      id: true,
-                      name: true,
-                      brand: true,
-                      type: true,
-                      stock: true,
-                      status: true,
-                    },
-                  },
-                },
-              },
             },
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} events send to user ${req.body.decodedToken.id}.`
+            `${result.length} tasks send to task ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -440,21 +361,21 @@ class EventRouter {
       async (req: Request, res: Response) => {
         try {
           console.log(
-            `Updating event ${
+            `Updating task ${
               req.body.id
             } using the following data: ${JSON.stringify(req.body.data)}`
           );
-          let result = await this.prismaService.prisma.event.update({
+          let result = await this.prismaService.prisma.task.update({
             where: { id: req.body.id },
             data: req.body.data,
           });
           if (!result) return res.status(400).send();
-          console.log(`Event ${req.body.id} updated.`);
+          console.log(`Task ${req.body.id} updated.`);
           req.body.data.id = req.body.id;
-          await this.prismaService.prisma.eventLog.create({
+          await this.prismaService.prisma.taskLog.create({
             data: {
               type: "update",
-              eventId: req.body.id,
+              taskId: req.body.id,
               operatorId: req.body.decodedToken.id,
               content: req.body.data,
             },
@@ -472,4 +393,4 @@ class EventRouter {
   };
 }
 
-export default EventRouter;
+export default TaskRouter;

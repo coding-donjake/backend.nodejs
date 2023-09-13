@@ -64,7 +64,7 @@ class AdminRouter {
   };
 
   private setGetRoute = async () => {
-    this.router.get(
+    this.router.post(
       this.getRoute,
       [
         this.authService.verifyToken,
@@ -128,7 +128,7 @@ class AdminRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} users send to user ${req.body.decodedToken.id}.`
+            `${result.length} admins send to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -143,7 +143,7 @@ class AdminRouter {
   };
 
   private setSearchRoute = async () => {
-    this.router.get(
+    this.router.post(
       this.searchRoute,
       [
         this.authService.verifyToken,
@@ -214,7 +214,7 @@ class AdminRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} users send to user ${req.body.decodedToken.id}.`
+            `${result.length} admins send to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -229,7 +229,7 @@ class AdminRouter {
   };
 
   private setSelectRoute = async () => {
-    this.router.get(
+    this.router.post(
       this.selectRoute,
       [
         this.authService.verifyToken,
@@ -293,7 +293,7 @@ class AdminRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} users send to user ${req.body.decodedToken.id}.`
+            `${result.length} admins send to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {

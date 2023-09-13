@@ -3,7 +3,7 @@ import { Router } from "express";
 import AuthenticationService from "../services/authentication-service";
 import PrismaService from "../services/prisma-service";
 
-class EventRouter {
+class OrderRouter {
   public router: Router;
   private authService: AuthenticationService =
     AuthenticationService.getInstance();
@@ -35,23 +35,23 @@ class EventRouter {
       async (req: Request, res: Response) => {
         try {
           console.log(
-            `Creating event using the following data: ${JSON.stringify(
+            `Creating order using the following data: ${JSON.stringify(
               req.body.data
             )}`
           );
-          const event = await this.prismaService.prisma.event.create({
+          const order = await this.prismaService.prisma.order.create({
             data: req.body.data,
           });
-          console.log(`Event created: ${JSON.stringify(event)}`);
-          await this.prismaService.prisma.eventLog.create({
+          console.log(`Order created: ${JSON.stringify(order)}`);
+          await this.prismaService.prisma.orderLog.create({
             data: {
               type: "create",
-              eventId: event.id,
+              orderId: order.id,
               operatorId: req.body.decodedToken.id,
-              content: event,
+              content: order,
             },
           });
-          res.status(200).json({ id: event.id });
+          res.status(200).json({ id: order.id });
         } catch (error) {
           console.error(error);
           res.status(500).json({
@@ -73,24 +73,21 @@ class EventRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.event.findMany({
+          let result = await this.prismaService.prisma.order.findMany({
             where: {
               OR: [
                 { status: "active" },
+                { status: "arrived" },
                 { status: "cancelled" },
-                { status: "completed" },
-                { status: "unpaid" },
               ],
             },
             select: {
               id: true,
-              datetimeStart: true,
-              datetimeEnd: true,
-              type: true,
-              name: true,
-              address: true,
+              datetimeOrdered: true,
+              datetimeExpected: true,
+              datetimeArrived: true,
               status: true,
-              EventLog: {
+              OrderLog: {
                 select: {
                   id: true,
                   datetime: true,
@@ -115,34 +112,17 @@ class EventRouter {
                   },
                 },
               },
-              Customer: {
+              Supplier: {
                 select: {
                   id: true,
+                  name: true,
                   address: true,
                   phone: true,
                   email: true,
                   status: true,
-                  User: {
-                    select: {
-                      id: true,
-                      username: true,
-                      status: true,
-                      UserInformation: {
-                        select: {
-                          id: true,
-                          lastname: true,
-                          firstname: true,
-                          middlename: true,
-                          suffix: true,
-                          gender: true,
-                          birthdate: true,
-                        },
-                      },
-                    },
-                  },
                 },
               },
-              EventSupply: {
+              OrderSupply: {
                 where: {
                   status: "ok",
                 },
@@ -166,7 +146,7 @@ class EventRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} events send to user ${req.body.decodedToken.id}.`
+            `${result.length} orders send to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -190,29 +170,34 @@ class EventRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.event.findMany({
+          let result = await this.prismaService.prisma.order.findMany({
             where: {
               AND: [
                 {
                   OR: [
                     { status: "active" },
+                    { status: "arrived" },
                     { status: "cancelled" },
-                    { status: "completed" },
-                    { status: "unpaid" },
                   ],
                 },
                 {
                   OR: [
                     {
-                      datetimeStart: {
-                        gte: req.body.datetimeStart.start,
-                        lte: req.body.datetimeStart.end,
+                      datetimeOrdered: {
+                        gte: req.body.datetimeOrdered.start,
+                        lte: req.body.datetimeOrdered.end,
                       },
                     },
                     {
-                      datetimeEnd: {
-                        gte: req.body.datetimeEnd.start,
-                        lte: req.body.datetimeEnd.end,
+                      datetimeExpected: {
+                        gte: req.body.datetimeExpected.start,
+                        lte: req.body.datetimeExpected.end,
+                      },
+                    },
+                    {
+                      datetimeArrived: {
+                        gte: req.body.datetimeArrived.start,
+                        lte: req.body.datetimeArrived.end,
                       },
                     },
                   ],
@@ -221,13 +206,11 @@ class EventRouter {
             },
             select: {
               id: true,
-              datetimeStart: true,
-              datetimeEnd: true,
-              type: true,
-              name: true,
-              address: true,
+              datetimeOrdered: true,
+              datetimeExpected: true,
+              datetimeArrived: true,
               status: true,
-              EventLog: {
+              OrderLog: {
                 select: {
                   id: true,
                   datetime: true,
@@ -252,34 +235,17 @@ class EventRouter {
                   },
                 },
               },
-              Customer: {
+              Supplier: {
                 select: {
                   id: true,
+                  name: true,
                   address: true,
                   phone: true,
                   email: true,
                   status: true,
-                  User: {
-                    select: {
-                      id: true,
-                      username: true,
-                      status: true,
-                      UserInformation: {
-                        select: {
-                          id: true,
-                          lastname: true,
-                          firstname: true,
-                          middlename: true,
-                          suffix: true,
-                          gender: true,
-                          birthdate: true,
-                        },
-                      },
-                    },
-                  },
                 },
               },
-              EventSupply: {
+              OrderSupply: {
                 where: {
                   status: "ok",
                 },
@@ -303,7 +269,7 @@ class EventRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} events send to user ${req.body.decodedToken.id}.`
+            `${result.length} orders send to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -327,19 +293,17 @@ class EventRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.event.findMany({
+          let result = await this.prismaService.prisma.order.findMany({
             where: {
               id: req.body.id,
             },
             select: {
               id: true,
-              datetimeStart: true,
-              datetimeEnd: true,
-              type: true,
-              name: true,
-              address: true,
+              datetimeOrdered: true,
+              datetimeExpected: true,
+              datetimeArrived: true,
               status: true,
-              EventLog: {
+              OrderLog: {
                 select: {
                   id: true,
                   datetime: true,
@@ -364,34 +328,17 @@ class EventRouter {
                   },
                 },
               },
-              Customer: {
+              Supplier: {
                 select: {
                   id: true,
+                  name: true,
                   address: true,
                   phone: true,
                   email: true,
                   status: true,
-                  User: {
-                    select: {
-                      id: true,
-                      username: true,
-                      status: true,
-                      UserInformation: {
-                        select: {
-                          id: true,
-                          lastname: true,
-                          firstname: true,
-                          middlename: true,
-                          suffix: true,
-                          gender: true,
-                          birthdate: true,
-                        },
-                      },
-                    },
-                  },
                 },
               },
-              EventSupply: {
+              OrderSupply: {
                 where: {
                   status: "ok",
                 },
@@ -415,7 +362,7 @@ class EventRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} events send to user ${req.body.decodedToken.id}.`
+            `${result.length} orders send to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -440,21 +387,21 @@ class EventRouter {
       async (req: Request, res: Response) => {
         try {
           console.log(
-            `Updating event ${
+            `Updating order ${
               req.body.id
             } using the following data: ${JSON.stringify(req.body.data)}`
           );
-          let result = await this.prismaService.prisma.event.update({
+          let result = await this.prismaService.prisma.order.update({
             where: { id: req.body.id },
             data: req.body.data,
           });
           if (!result) return res.status(400).send();
-          console.log(`Event ${req.body.id} updated.`);
+          console.log(`Order ${req.body.id} updated.`);
           req.body.data.id = req.body.id;
-          await this.prismaService.prisma.eventLog.create({
+          await this.prismaService.prisma.orderLog.create({
             data: {
               type: "update",
-              eventId: req.body.id,
+              orderId: req.body.id,
               operatorId: req.body.decodedToken.id,
               content: req.body.data,
             },
@@ -472,4 +419,4 @@ class EventRouter {
   };
 }
 
-export default EventRouter;
+export default OrderRouter;

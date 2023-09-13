@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
 import { Router } from "express";
-import AuthenticationService from "../services/authentication-service";
 import PrismaService from "../services/prisma-service";
+import HashService from "../services/hash-service";
+import AuthenticationService from "../services/authentication-service";
 
-class EventRouter {
+class SupplyRouter {
   public router: Router;
   private authService: AuthenticationService =
     AuthenticationService.getInstance();
@@ -35,23 +36,23 @@ class EventRouter {
       async (req: Request, res: Response) => {
         try {
           console.log(
-            `Creating event using the following data: ${JSON.stringify(
+            `Creating supply using the following data: ${JSON.stringify(
               req.body.data
             )}`
           );
-          const event = await this.prismaService.prisma.event.create({
+          const supply = await this.prismaService.prisma.supply.create({
             data: req.body.data,
           });
-          console.log(`Event created: ${JSON.stringify(event)}`);
-          await this.prismaService.prisma.eventLog.create({
+          console.log(`Supply created: ${JSON.stringify(supply)}`);
+          await this.prismaService.prisma.supplyLog.create({
             data: {
               type: "create",
-              eventId: event.id,
+              supplyId: supply.id,
               operatorId: req.body.decodedToken.id,
-              content: event,
+              content: supply,
             },
           });
-          res.status(200).json({ id: event.id });
+          res.status(200).json({ id: supply.id });
         } catch (error) {
           console.error(error);
           res.status(500).json({
@@ -73,24 +74,18 @@ class EventRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.event.findMany({
+          let result = await this.prismaService.prisma.supply.findMany({
             where: {
-              OR: [
-                { status: "active" },
-                { status: "cancelled" },
-                { status: "completed" },
-                { status: "unpaid" },
-              ],
+              status: "ok",
             },
             select: {
               id: true,
-              datetimeStart: true,
-              datetimeEnd: true,
-              type: true,
               name: true,
-              address: true,
+              brand: true,
+              type: true,
+              stock: true,
               status: true,
-              EventLog: {
+              SupplyLog: {
                 select: {
                   id: true,
                   datetime: true,
@@ -115,58 +110,11 @@ class EventRouter {
                   },
                 },
               },
-              Customer: {
-                select: {
-                  id: true,
-                  address: true,
-                  phone: true,
-                  email: true,
-                  status: true,
-                  User: {
-                    select: {
-                      id: true,
-                      username: true,
-                      status: true,
-                      UserInformation: {
-                        select: {
-                          id: true,
-                          lastname: true,
-                          firstname: true,
-                          middlename: true,
-                          suffix: true,
-                          gender: true,
-                          birthdate: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              EventSupply: {
-                where: {
-                  status: "ok",
-                },
-                select: {
-                  id: true,
-                  quantity: true,
-                  status: true,
-                  Supply: {
-                    select: {
-                      id: true,
-                      name: true,
-                      brand: true,
-                      type: true,
-                      stock: true,
-                      status: true,
-                    },
-                  },
-                },
-              },
             },
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} events send to user ${req.body.decodedToken.id}.`
+            `${result.length} supplies send to supply ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -190,44 +138,27 @@ class EventRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.event.findMany({
+          let result = await this.prismaService.prisma.supply.findMany({
             where: {
               AND: [
+                { status: "ok" },
                 {
                   OR: [
-                    { status: "active" },
-                    { status: "cancelled" },
-                    { status: "completed" },
-                    { status: "unpaid" },
-                  ],
-                },
-                {
-                  OR: [
-                    {
-                      datetimeStart: {
-                        gte: req.body.datetimeStart.start,
-                        lte: req.body.datetimeStart.end,
-                      },
-                    },
-                    {
-                      datetimeEnd: {
-                        gte: req.body.datetimeEnd.start,
-                        lte: req.body.datetimeEnd.end,
-                      },
-                    },
+                    { name: req.body.key },
+                    { brand: req.body.key },
+                    { type: req.body.key },
                   ],
                 },
               ],
             },
             select: {
               id: true,
-              datetimeStart: true,
-              datetimeEnd: true,
-              type: true,
               name: true,
-              address: true,
+              brand: true,
+              type: true,
+              stock: true,
               status: true,
-              EventLog: {
+              SupplyLog: {
                 select: {
                   id: true,
                   datetime: true,
@@ -252,58 +183,11 @@ class EventRouter {
                   },
                 },
               },
-              Customer: {
-                select: {
-                  id: true,
-                  address: true,
-                  phone: true,
-                  email: true,
-                  status: true,
-                  User: {
-                    select: {
-                      id: true,
-                      username: true,
-                      status: true,
-                      UserInformation: {
-                        select: {
-                          id: true,
-                          lastname: true,
-                          firstname: true,
-                          middlename: true,
-                          suffix: true,
-                          gender: true,
-                          birthdate: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              EventSupply: {
-                where: {
-                  status: "ok",
-                },
-                select: {
-                  id: true,
-                  quantity: true,
-                  status: true,
-                  Supply: {
-                    select: {
-                      id: true,
-                      name: true,
-                      brand: true,
-                      type: true,
-                      stock: true,
-                      status: true,
-                    },
-                  },
-                },
-              },
             },
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} events send to user ${req.body.decodedToken.id}.`
+            `${result.length} supplies send to supply ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -327,19 +211,18 @@ class EventRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.event.findMany({
+          let result = await this.prismaService.prisma.supply.findMany({
             where: {
               id: req.body.id,
             },
             select: {
               id: true,
-              datetimeStart: true,
-              datetimeEnd: true,
-              type: true,
               name: true,
-              address: true,
+              brand: true,
+              type: true,
+              stock: true,
               status: true,
-              EventLog: {
+              SupplyLog: {
                 select: {
                   id: true,
                   datetime: true,
@@ -364,58 +247,11 @@ class EventRouter {
                   },
                 },
               },
-              Customer: {
-                select: {
-                  id: true,
-                  address: true,
-                  phone: true,
-                  email: true,
-                  status: true,
-                  User: {
-                    select: {
-                      id: true,
-                      username: true,
-                      status: true,
-                      UserInformation: {
-                        select: {
-                          id: true,
-                          lastname: true,
-                          firstname: true,
-                          middlename: true,
-                          suffix: true,
-                          gender: true,
-                          birthdate: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              EventSupply: {
-                where: {
-                  status: "ok",
-                },
-                select: {
-                  id: true,
-                  quantity: true,
-                  status: true,
-                  Supply: {
-                    select: {
-                      id: true,
-                      name: true,
-                      brand: true,
-                      type: true,
-                      stock: true,
-                      status: true,
-                    },
-                  },
-                },
-              },
             },
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} events send to user ${req.body.decodedToken.id}.`
+            `${result.length} supplies send to supply ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -440,21 +276,21 @@ class EventRouter {
       async (req: Request, res: Response) => {
         try {
           console.log(
-            `Updating event ${
+            `Updating supply ${
               req.body.id
             } using the following data: ${JSON.stringify(req.body.data)}`
           );
-          let result = await this.prismaService.prisma.event.update({
+          let result = await this.prismaService.prisma.supply.update({
             where: { id: req.body.id },
             data: req.body.data,
           });
           if (!result) return res.status(400).send();
-          console.log(`Event ${req.body.id} updated.`);
+          console.log(`Supply ${req.body.id} updated.`);
           req.body.data.id = req.body.id;
-          await this.prismaService.prisma.eventLog.create({
+          await this.prismaService.prisma.supplyLog.create({
             data: {
               type: "update",
-              eventId: req.body.id,
+              supplyId: req.body.id,
               operatorId: req.body.decodedToken.id,
               content: req.body.data,
             },
@@ -472,4 +308,4 @@ class EventRouter {
   };
 }
 
-export default EventRouter;
+export default SupplyRouter;
