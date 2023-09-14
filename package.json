@@ -6,7 +6,7 @@
   "scripts": {
     "migrate:deploy": "npx prisma migrate deploy",
     "migrate:generate": "npx prisma generate",
-    "migrate:init": "npx prisma migrate dev --name init",
+    "migrate:init": "npx prisma migrate dev --name init --create-only",
     "migrate:seed": "ts-node prisma/seed.ts",
     "migrate:update": "npx prisma migrate dev --name update",
     "dev": "nodemon",
