@@ -171,8 +171,8 @@ class UserRouter {
   private setLoginRoute = async () => {
     this.router.post(this.loginRoute, async (req: Request, res: Response) => {
       try {
-        console.log(`Login attempt using ${req.body.username}`);
-        const { username, password } = req.body;
+        console.log(`Login attempt using ${req.body.data.username}`);
+        const { username, password } = req.body.data;
         const user = await this.authService.authenticateUser(
           username,
           password
