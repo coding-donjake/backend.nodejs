@@ -18,6 +18,76 @@ class UserRouter {
   private selectRoute: string = "/select";
   private updateRoute: string = "/update";
 
+  private selectTemplate: object = {
+    id: true,
+    username: true,
+    status: true,
+    UserLog: {
+      orderBy: {
+        datetime: "desc",
+      },
+      select: {
+        id: true,
+        datetime: true,
+        type: true,
+        content: true,
+        Operator: {
+          select: {
+            id: true,
+            username: true,
+            UserInformation: {
+              select: {
+                id: true,
+                lastname: true,
+                firstname: true,
+                middlename: true,
+                suffix: true,
+                gender: true,
+                birthdate: true,
+              },
+            },
+          },
+        },
+      },
+    },
+    UserInformation: {
+      select: {
+        id: true,
+        lastname: true,
+        firstname: true,
+        middlename: true,
+        suffix: true,
+        gender: true,
+        birthdate: true,
+        UserInformationLog: {
+          select: {
+            id: true,
+            datetime: true,
+            type: true,
+            content: true,
+            Operator: {
+              select: {
+                id: true,
+                username: true,
+                UserInformation: {
+                  select: {
+                    id: true,
+                    lastname: true,
+                    firstname: true,
+                    middlename: true,
+                    suffix: true,
+                    gender: true,
+                    birthdate: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+
   constructor() {
     this.router = Router();
     this.setCreateRoute();
@@ -47,6 +117,8 @@ class UserRouter {
               req.body.data
             )}`
           );
+          const checkUsernameExists = await this.prismaService.prisma.user
+            .findMany;
           const user = await this.prismaService.prisma.user.create({
             data: req.body.data,
           });
@@ -85,72 +157,7 @@ class UserRouter {
             where: {
               OR: [{ status: "ok" }, { status: "unverified" }],
             },
-            select: {
-              id: true,
-              username: true,
-              status: true,
-              UserLog: {
-                select: {
-                  id: true,
-                  datetime: true,
-                  type: true,
-                  content: true,
-                  Operator: {
-                    select: {
-                      id: true,
-                      username: true,
-                      UserInformation: {
-                        select: {
-                          id: true,
-                          lastname: true,
-                          firstname: true,
-                          middlename: true,
-                          suffix: true,
-                          gender: true,
-                          birthdate: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              UserInformation: {
-                select: {
-                  id: true,
-                  lastname: true,
-                  firstname: true,
-                  middlename: true,
-                  suffix: true,
-                  gender: true,
-                  birthdate: true,
-                  UserInformationLog: {
-                    select: {
-                      id: true,
-                      datetime: true,
-                      type: true,
-                      content: true,
-                      Operator: {
-                        select: {
-                          id: true,
-                          username: true,
-                          UserInformation: {
-                            select: {
-                              id: true,
-                              lastname: true,
-                              firstname: true,
-                              middlename: true,
-                              suffix: true,
-                              gender: true,
-                              birthdate: true,
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
+            select: this.selectTemplate,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -171,13 +178,14 @@ class UserRouter {
   private setLoginRoute = async () => {
     this.router.post(this.loginRoute, async (req: Request, res: Response) => {
       try {
-        console.log(`Login attempt using ${req.body.username}`);
-        const { username, password } = req.body;
+        console.log(`Login attempt using ${req.body.data.username}`);
+        const { username, password } = req.body.data;
         const user = await this.authService.authenticateUser(
           username,
           password
         );
         if (!user) {
+          console.log(`User ${username} login failed.`);
           res.status(401).send();
           return;
         }
@@ -211,81 +219,31 @@ class UserRouter {
         try {
           let result = await this.prismaService.prisma.user.findMany({
             where: {
-              OR: [{ status: "ok" }, { status: "unverified" }],
-            },
-            select: {
-              id: true,
-              username: true,
-              status: true,
-              UserLog: {
-                select: {
-                  id: true,
-                  datetime: true,
-                  type: true,
-                  content: true,
-                  Operator: {
-                    select: {
-                      id: true,
-                      username: true,
+              AND: [
+                { OR: [{ status: "ok" }, { status: "unverified" }] },
+                {
+                  OR: [
+                    { username: req.body.key },
+                    {
                       UserInformation: {
-                        select: {
-                          id: true,
-                          lastname: true,
-                          firstname: true,
-                          middlename: true,
-                          suffix: true,
-                          gender: true,
-                          birthdate: true,
-                        },
+                        lastname: req.body.key,
                       },
                     },
-                  },
-                },
-              },
-              UserInformation: {
-                where: {
-                  OR: [
-                    { lastname: req.body.key },
-                    { firstname: req.body.key },
-                    { middlename: req.body.key },
+                    {
+                      UserInformation: {
+                        firstname: req.body.key,
+                      },
+                    },
+                    {
+                      UserInformation: {
+                        middlename: req.body.key,
+                      },
+                    },
                   ],
                 },
-                select: {
-                  id: true,
-                  lastname: true,
-                  firstname: true,
-                  middlename: true,
-                  suffix: true,
-                  gender: true,
-                  birthdate: true,
-                  UserInformationLog: {
-                    select: {
-                      id: true,
-                      datetime: true,
-                      type: true,
-                      content: true,
-                      Operator: {
-                        select: {
-                          id: true,
-                          username: true,
-                          UserInformation: {
-                            select: {
-                              id: true,
-                              lastname: true,
-                              firstname: true,
-                              middlename: true,
-                              suffix: true,
-                              gender: true,
-                              birthdate: true,
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
+              ],
             },
+            select: this.selectTemplate,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -313,80 +271,15 @@ class UserRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.user.findMany({
+          let result = await this.prismaService.prisma.user.findFirst({
             where: {
               id: req.body.id,
             },
-            select: {
-              id: true,
-              username: true,
-              status: true,
-              UserLog: {
-                select: {
-                  id: true,
-                  datetime: true,
-                  type: true,
-                  content: true,
-                  Operator: {
-                    select: {
-                      id: true,
-                      username: true,
-                      UserInformation: {
-                        select: {
-                          id: true,
-                          lastname: true,
-                          firstname: true,
-                          middlename: true,
-                          suffix: true,
-                          gender: true,
-                          birthdate: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              UserInformation: {
-                select: {
-                  id: true,
-                  lastname: true,
-                  firstname: true,
-                  middlename: true,
-                  suffix: true,
-                  gender: true,
-                  birthdate: true,
-                  UserInformationLog: {
-                    select: {
-                      id: true,
-                      datetime: true,
-                      type: true,
-                      content: true,
-                      Operator: {
-                        select: {
-                          id: true,
-                          username: true,
-                          UserInformation: {
-                            select: {
-                              id: true,
-                              lastname: true,
-                              firstname: true,
-                              middlename: true,
-                              suffix: true,
-                              gender: true,
-                              birthdate: true,
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
+            select: this.selectTemplate,
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} users sent to user ${req.body.decodedToken.id}.`
+            `user record has been sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -403,11 +296,7 @@ class UserRouter {
   private setUpdateRoute = async () => {
     this.router.post(
       this.updateRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
           console.log(
@@ -415,6 +304,12 @@ class UserRouter {
               req.body.id
             } using the following data: ${JSON.stringify(req.body.data)}`
           );
+          if (req.body.data.password) {
+            req.body.data.password = await this.hashService.hashPassword(
+              req.body.data.password,
+              10
+            );
+          }
           let result = await this.prismaService.prisma.user.update({
             where: { id: req.body.id },
             data: req.body.data,
