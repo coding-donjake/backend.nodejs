@@ -6,12 +6,13 @@
   "scripts": {
     "migrate:deploy": "npx prisma migrate deploy",
     "migrate:generate": "npx prisma generate",
-    "migrate:init": "npx prisma migrate dev --name init",
+    "migrate:init": "npx prisma migrate dev --name init --create-only",
     "migrate:seed": "ts-node prisma/seed.ts",
-    "migrate:update": "npx prisma migrate dev --name update",
+    "migrate:update": "npx prisma migrate dev --name update --create-only",
     "dev": "nodemon",
-    "setup": "npm run migrate:deploy && npm run migrate:generate && npm run migrate:seed",
-    "start": "ts-node"
+    "setup": "npm install && npm run migrate:init && npm run migrate:deploy && npm run migrate:generate && npm run migrate:seed",
+    "start": "ts-node",
+    "update": "npm install && npm run migrate:update && npm run migrate:deploy && npm run migrate:generate"
   },
   "keywords": [],
   "author": "",
