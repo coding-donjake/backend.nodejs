@@ -178,6 +178,7 @@ class UserRouter {
           password
         );
         if (!user) {
+          console.log(`User ${username} login failed.`);
           res.status(401).send();
           return;
         }
@@ -211,7 +212,29 @@ class UserRouter {
         try {
           let result = await this.prismaService.prisma.user.findMany({
             where: {
-              OR: [{ status: "ok" }, { status: "unverified" }],
+              AND: [
+                { OR: [{ status: "ok" }, { status: "unverified" }] },
+                {
+                  OR: [
+                    { username: req.body.key },
+                    {
+                      UserInformation: {
+                        lastname: req.body.key,
+                      },
+                    },
+                    {
+                      UserInformation: {
+                        firstname: req.body.key,
+                      },
+                    },
+                    {
+                      UserInformation: {
+                        middlename: req.body.key,
+                      },
+                    },
+                  ],
+                },
+              ],
             },
             select: {
               id: true,
@@ -243,13 +266,6 @@ class UserRouter {
                 },
               },
               UserInformation: {
-                where: {
-                  OR: [
-                    { lastname: req.body.key },
-                    { firstname: req.body.key },
-                    { middlename: req.body.key },
-                  ],
-                },
                 select: {
                   id: true,
                   lastname: true,
@@ -403,11 +419,7 @@ class UserRouter {
   private setUpdateRoute = async () => {
     this.router.post(
       this.updateRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
           console.log(
@@ -415,6 +427,12 @@ class UserRouter {
               req.body.id
             } using the following data: ${JSON.stringify(req.body.data)}`
           );
+          if (req.body.data.password) {
+            req.body.data.password = await this.hashService.hashPassword(
+              req.body.data.password,
+              10
+            );
+          }
           let result = await this.prismaService.prisma.user.update({
             where: { id: req.body.id },
             data: req.body.data,

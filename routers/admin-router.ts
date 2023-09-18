@@ -11,6 +11,7 @@ class AdminRouter {
 
   private createRoute: string = "/create";
   private getRoute: string = "/get";
+  private loginRoute: string = "/login";
   private searchRoute: string = "/search";
   private selectRoute: string = "/select";
   private updateRoute: string = "/update";
@@ -19,6 +20,7 @@ class AdminRouter {
     this.router = Router();
     this.setCreateRoute();
     this.setGetRoute();
+    this.setLoginRoute();
     this.setSearchRoute();
     this.setSelectRoute();
     this.setUpdateRoute();
@@ -140,6 +142,38 @@ class AdminRouter {
         }
       }
     );
+  };
+
+  private setLoginRoute = async () => {
+    this.router.post(this.loginRoute, async (req: Request, res: Response) => {
+      try {
+        console.log(`Login as admin attempt using ${req.body.data.username}`);
+        const { username, password } = req.body.data;
+        const user = await this.authService.authenticateAdmin(
+          username,
+          password
+        );
+        if (!user) {
+          console.log(`User ${username} login failed.`);
+          res.status(401).send();
+          return;
+        }
+        console.log(`User ${username} successfully logged in.`);
+        res.status(200).json({
+          accessToken: this.authService.generateAccessToken(
+            user,
+            process.env.TOKEN_DURATION!
+          ),
+          refreshToken: this.authService.generateRefreshToken(user),
+        });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({
+          status: "server error",
+          msg: error,
+        });
+      }
+    });
   };
 
   private setSearchRoute = async () => {

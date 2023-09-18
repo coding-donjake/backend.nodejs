@@ -66,11 +66,7 @@ class AssetRouter {
   private setGetRoute = async () => {
     this.router.post(
       this.getRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
           let result = await this.prismaService.prisma.asset.findMany({
@@ -145,6 +141,7 @@ class AssetRouter {
                     { name: req.body.key },
                     { brand: req.body.key },
                     { type: req.body.key },
+                    { status: req.body.key },
                   ],
                 },
               ],

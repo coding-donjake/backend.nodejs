@@ -35,7 +35,7 @@ model Asset {
   name      String      @db.VarChar(255)
   brand     String      @db.VarChar(255)
   type      String      @db.VarChar(20)
-  status    AssetStatus
+  status    AssetStatus @default(good)
   Borrowing Borrowing[]
   AssetLog  AssetLog[]
 }
@@ -55,9 +55,9 @@ model Borrowing {
   id               String          @id @default(uuid())
   datetimeBorrowed DateTime?
   datetimeReturned DateTime?
-  remarksBorrowed  String          @db.Text
-  remarksReturned  String          @db.Text
-  status           BorrowingStatus
+  remarksBorrowed  String?         @db.Text
+  remarksReturned  String?         @db.Text
+  status           BorrowingStatus @default(pending)
   Asset            Asset?          @relation(fields: [assetId], references: [id])
   assetId          String?
   User             User?           @relation(fields: [userId], references: [id])
