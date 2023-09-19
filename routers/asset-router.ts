@@ -78,6 +78,7 @@ class AssetRouter {
               name: true,
               brand: true,
               type: true,
+              serialCode: true,
               status: true,
               AssetLog: {
                 select: {
@@ -141,7 +142,7 @@ class AssetRouter {
                     { name: req.body.key },
                     { brand: req.body.key },
                     { type: req.body.key },
-                    { status: req.body.key },
+                    { serialCode: req.body.key },
                   ],
                 },
               ],
@@ -151,6 +152,7 @@ class AssetRouter {
               name: true,
               brand: true,
               type: true,
+              serialCode: true,
               status: true,
               AssetLog: {
                 select: {
@@ -214,6 +216,7 @@ class AssetRouter {
               name: true,
               brand: true,
               type: true,
+              serialCode: true,
               status: true,
               AssetLog: {
                 select: {

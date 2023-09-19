@@ -31,13 +31,14 @@ model AdminLog {
 }
 
 model Asset {
-  id        String      @id @default(uuid())
-  name      String      @db.VarChar(255)
-  brand     String      @db.VarChar(255)
-  type      String      @db.VarChar(20)
-  status    AssetStatus @default(good)
-  Borrowing Borrowing[]
-  AssetLog  AssetLog[]
+  id         String      @id @default(uuid())
+  name       String      @db.VarChar(255)
+  brand      String      @db.VarChar(255)
+  type       String      @db.VarChar(20)
+  serialCode String      @db.VarChar(255)
+  status     AssetStatus @default(good)
+  Borrowing  Borrowing[]
+  AssetLog   AssetLog[]
 }
 
 model AssetLog {
@@ -57,6 +58,7 @@ model Borrowing {
   datetimeReturned DateTime?
   remarksBorrowed  String?         @db.Text
   remarksReturned  String?         @db.Text
+  duration         Int
   status           BorrowingStatus @default(pending)
   Asset            Asset?          @relation(fields: [assetId], references: [id])
   assetId          String?
