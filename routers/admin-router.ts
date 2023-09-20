@@ -11,14 +11,65 @@ class AdminRouter {
 
   private createRoute: string = "/create";
   private getRoute: string = "/get";
+  private loginRoute: string = "/login";
   private searchRoute: string = "/search";
   private selectRoute: string = "/select";
   private updateRoute: string = "/update";
+
+  private selectTemplate: object = {
+    id: true,
+    role: true,
+    status: true,
+    AdminLog: {
+      select: {
+        id: true,
+        datetime: true,
+        type: true,
+        content: true,
+        Operator: {
+          select: {
+            id: true,
+            username: true,
+            UserInformation: {
+              select: {
+                id: true,
+                lastname: true,
+                firstname: true,
+                middlename: true,
+                suffix: true,
+                gender: true,
+                birthdate: true,
+              },
+            },
+          },
+        },
+      },
+    },
+    User: {
+      select: {
+        id: true,
+        username: true,
+        status: true,
+        UserInformation: {
+          select: {
+            id: true,
+            lastname: true,
+            firstname: true,
+            middlename: true,
+            suffix: true,
+            gender: true,
+            birthdate: true,
+          },
+        },
+      },
+    },
+  };
 
   constructor() {
     this.router = Router();
     this.setCreateRoute();
     this.setGetRoute();
+    this.setLoginRoute();
     this.setSearchRoute();
     this.setSelectRoute();
     this.setUpdateRoute();
@@ -77,54 +128,7 @@ class AdminRouter {
             where: {
               OR: [{ status: "ok" }],
             },
-            select: {
-              id: true,
-              role: true,
-              status: true,
-              AdminLog: {
-                select: {
-                  id: true,
-                  datetime: true,
-                  type: true,
-                  content: true,
-                  Operator: {
-                    select: {
-                      id: true,
-                      username: true,
-                      UserInformation: {
-                        select: {
-                          id: true,
-                          lastname: true,
-                          firstname: true,
-                          middlename: true,
-                          suffix: true,
-                          gender: true,
-                          birthdate: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              User: {
-                select: {
-                  id: true,
-                  username: true,
-                  status: true,
-                  UserInformation: {
-                    select: {
-                      id: true,
-                      lastname: true,
-                      firstname: true,
-                      middlename: true,
-                      suffix: true,
-                      gender: true,
-                      birthdate: true,
-                    },
-                  },
-                },
-              },
-            },
+            select: this.selectTemplate,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -142,6 +146,38 @@ class AdminRouter {
     );
   };
 
+  private setLoginRoute = async () => {
+    this.router.post(this.loginRoute, async (req: Request, res: Response) => {
+      try {
+        console.log(`Login as admin attempt using ${req.body.data.username}`);
+        const { username, password } = req.body.data;
+        const user = await this.authService.authenticateAdmin(
+          username,
+          password
+        );
+        if (!user) {
+          console.log(`User ${username} login failed.`);
+          res.status(401).send();
+          return;
+        }
+        console.log(`User ${username} successfully logged in.`);
+        res.status(200).json({
+          accessToken: this.authService.generateAccessToken(
+            user,
+            process.env.TOKEN_DURATION!
+          ),
+          refreshToken: this.authService.generateRefreshToken(user),
+        });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({
+          status: "server error",
+          msg: error,
+        });
+      }
+    });
+  };
+
   private setSearchRoute = async () => {
     this.router.post(
       this.searchRoute,
@@ -154,63 +190,37 @@ class AdminRouter {
         try {
           let result = await this.prismaService.prisma.admin.findMany({
             where: {
-              OR: [{ status: "ok" }],
-            },
-            select: {
-              id: true,
-              role: true,
-              status: true,
-              AdminLog: {
-                select: {
-                  id: true,
-                  datetime: true,
-                  type: true,
-                  content: true,
-                  Operator: {
-                    select: {
-                      id: true,
-                      username: true,
-                      UserInformation: {
-                        select: {
-                          id: true,
-                          lastname: true,
-                          firstname: true,
-                          middlename: true,
-                          suffix: true,
-                          gender: true,
-                          birthdate: true,
+              AND: [
+                { OR: [{ status: "ok" }] },
+                {
+                  OR: [
+                    { User: { username: req.body.key } },
+                    {
+                      User: {
+                        UserInformation: {
+                          lastname: req.body.key,
                         },
                       },
                     },
-                  },
-                },
-              },
-              User: {
-                select: {
-                  id: true,
-                  username: true,
-                  status: true,
-                  UserInformation: {
-                    where: {
-                      OR: [
-                        { lastname: req.body.key },
-                        { firstname: req.body.key },
-                        { middlename: req.body.key },
-                      ],
+                    {
+                      User: {
+                        UserInformation: {
+                          firstname: req.body.key,
+                        },
+                      },
                     },
-                    select: {
-                      id: true,
-                      lastname: true,
-                      firstname: true,
-                      middlename: true,
-                      suffix: true,
-                      gender: true,
-                      birthdate: true,
+                    {
+                      User: {
+                        UserInformation: {
+                          middlename: req.body.key,
+                        },
+                      },
                     },
-                  },
+                  ],
                 },
-              },
+              ],
             },
+            select: this.selectTemplate,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -238,62 +248,15 @@ class AdminRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.admin.findMany({
+          let result = await this.prismaService.prisma.admin.findFirst({
             where: {
               id: req.body.id,
             },
-            select: {
-              id: true,
-              role: true,
-              status: true,
-              AdminLog: {
-                select: {
-                  id: true,
-                  datetime: true,
-                  type: true,
-                  content: true,
-                  Operator: {
-                    select: {
-                      id: true,
-                      username: true,
-                      UserInformation: {
-                        select: {
-                          id: true,
-                          lastname: true,
-                          firstname: true,
-                          middlename: true,
-                          suffix: true,
-                          gender: true,
-                          birthdate: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              User: {
-                select: {
-                  id: true,
-                  username: true,
-                  status: true,
-                  UserInformation: {
-                    select: {
-                      id: true,
-                      lastname: true,
-                      firstname: true,
-                      middlename: true,
-                      suffix: true,
-                      gender: true,
-                      birthdate: true,
-                    },
-                  },
-                },
-              },
-            },
+            select: this.selectTemplate,
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} admins sent to user ${req.body.decodedToken.id}.`
+            `admin record has been sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
