@@ -15,6 +15,67 @@ class BorrowingRouter {
   private selectRoute: string = "/select";
   private updateRoute: string = "/update";
 
+  private selectTemplate: object = {
+    id: true,
+    datetimeBorrowed: true,
+    datetimeReturned: true,
+    remarksBorrowed: true,
+    remarksReturned: true,
+    status: true,
+    BorrowingLog: {
+      select: {
+        id: true,
+        datetime: true,
+        type: true,
+        content: true,
+        Operator: {
+          select: {
+            id: true,
+            username: true,
+            UserInformation: {
+              select: {
+                id: true,
+                lastname: true,
+                firstname: true,
+                middlename: true,
+                suffix: true,
+                gender: true,
+                birthdate: true,
+              },
+            },
+          },
+        },
+      },
+    },
+    Asset: {
+      select: {
+        id: true,
+        name: true,
+        brand: true,
+        type: true,
+        status: true,
+      },
+    },
+    User: {
+      select: {
+        id: true,
+        username: true,
+        status: true,
+        UserInformation: {
+          select: {
+            id: true,
+            lastname: true,
+            firstname: true,
+            middlename: true,
+            suffix: true,
+            gender: true,
+            birthdate: true,
+          },
+        },
+      },
+    },
+  };
+
   constructor() {
     this.router = Router();
     this.setCreateRoute();
@@ -79,66 +140,7 @@ class BorrowingRouter {
                 { status: "declined" },
               ],
             },
-            select: {
-              id: true,
-              datetimeBorrowed: true,
-              datetimeReturned: true,
-              remarksBorrowed: true,
-              remarksReturned: true,
-              status: true,
-              BorrowingLog: {
-                select: {
-                  id: true,
-                  datetime: true,
-                  type: true,
-                  content: true,
-                  Operator: {
-                    select: {
-                      id: true,
-                      username: true,
-                      UserInformation: {
-                        select: {
-                          id: true,
-                          lastname: true,
-                          firstname: true,
-                          middlename: true,
-                          suffix: true,
-                          gender: true,
-                          birthdate: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              Asset: {
-                select: {
-                  id: true,
-                  name: true,
-                  brand: true,
-                  type: true,
-                  status: true,
-                },
-              },
-              User: {
-                select: {
-                  id: true,
-                  username: true,
-                  status: true,
-                  UserInformation: {
-                    select: {
-                      id: true,
-                      lastname: true,
-                      firstname: true,
-                      middlename: true,
-                      suffix: true,
-                      gender: true,
-                      birthdate: true,
-                    },
-                  },
-                },
-              },
-            },
+            select: this.selectTemplate,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -195,66 +197,7 @@ class BorrowingRouter {
                 },
               ],
             },
-            select: {
-              id: true,
-              datetimeBorrowed: true,
-              datetimeReturned: true,
-              remarksBorrowed: true,
-              remarksReturned: true,
-              status: true,
-              BorrowingLog: {
-                select: {
-                  id: true,
-                  datetime: true,
-                  type: true,
-                  content: true,
-                  Operator: {
-                    select: {
-                      id: true,
-                      username: true,
-                      UserInformation: {
-                        select: {
-                          id: true,
-                          lastname: true,
-                          firstname: true,
-                          middlename: true,
-                          suffix: true,
-                          gender: true,
-                          birthdate: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              Asset: {
-                select: {
-                  id: true,
-                  name: true,
-                  brand: true,
-                  type: true,
-                  status: true,
-                },
-              },
-              User: {
-                select: {
-                  id: true,
-                  username: true,
-                  status: true,
-                  UserInformation: {
-                    select: {
-                      id: true,
-                      lastname: true,
-                      firstname: true,
-                      middlename: true,
-                      suffix: true,
-                      gender: true,
-                      birthdate: true,
-                    },
-                  },
-                },
-              },
-            },
+            select: this.selectTemplate,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -286,66 +229,7 @@ class BorrowingRouter {
             where: {
               id: req.body.id,
             },
-            select: {
-              id: true,
-              datetimeBorrowed: true,
-              datetimeReturned: true,
-              remarksBorrowed: true,
-              remarksReturned: true,
-              status: true,
-              BorrowingLog: {
-                select: {
-                  id: true,
-                  datetime: true,
-                  type: true,
-                  content: true,
-                  Operator: {
-                    select: {
-                      id: true,
-                      username: true,
-                      UserInformation: {
-                        select: {
-                          id: true,
-                          lastname: true,
-                          firstname: true,
-                          middlename: true,
-                          suffix: true,
-                          gender: true,
-                          birthdate: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              Asset: {
-                select: {
-                  id: true,
-                  name: true,
-                  brand: true,
-                  type: true,
-                  status: true,
-                },
-              },
-              User: {
-                select: {
-                  id: true,
-                  username: true,
-                  status: true,
-                  UserInformation: {
-                    select: {
-                      id: true,
-                      lastname: true,
-                      firstname: true,
-                      middlename: true,
-                      suffix: true,
-                      gender: true,
-                      birthdate: true,
-                    },
-                  },
-                },
-              },
-            },
+            select: this.selectTemplate,
           });
           if (!result) return res.status(400).send();
           console.log(
