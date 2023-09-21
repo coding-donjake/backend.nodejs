@@ -15,6 +15,88 @@ class EventRouter {
   private selectRoute: string = "/select";
   private updateRoute: string = "/update";
 
+  private selectTemplate: object = {
+    id: true,
+    datetimeStart: true,
+    datetimeEnd: true,
+    type: true,
+    name: true,
+    address: true,
+    status: true,
+    EventLog: {
+      select: {
+        id: true,
+        datetime: true,
+        type: true,
+        content: true,
+        Operator: {
+          select: {
+            id: true,
+            username: true,
+            UserInformation: {
+              select: {
+                id: true,
+                lastname: true,
+                firstname: true,
+                middlename: true,
+                suffix: true,
+                gender: true,
+                birthdate: true,
+              },
+            },
+          },
+        },
+      },
+    },
+    Customer: {
+      select: {
+        id: true,
+        address: true,
+        phone: true,
+        email: true,
+        status: true,
+        User: {
+          select: {
+            id: true,
+            username: true,
+            status: true,
+            UserInformation: {
+              select: {
+                id: true,
+                lastname: true,
+                firstname: true,
+                middlename: true,
+                suffix: true,
+                gender: true,
+                birthdate: true,
+              },
+            },
+          },
+        },
+      },
+    },
+    EventSupply: {
+      where: {
+        status: "ok",
+      },
+      select: {
+        id: true,
+        quantity: true,
+        status: true,
+        Supply: {
+          select: {
+            id: true,
+            name: true,
+            brand: true,
+            type: true,
+            stock: true,
+            status: true,
+          },
+        },
+      },
+    },
+  };
+
   constructor() {
     this.router = Router();
     this.setCreateRoute();
@@ -82,87 +164,7 @@ class EventRouter {
                 { status: "unpaid" },
               ],
             },
-            select: {
-              id: true,
-              datetimeStart: true,
-              datetimeEnd: true,
-              type: true,
-              name: true,
-              address: true,
-              status: true,
-              EventLog: {
-                select: {
-                  id: true,
-                  datetime: true,
-                  type: true,
-                  content: true,
-                  Operator: {
-                    select: {
-                      id: true,
-                      username: true,
-                      UserInformation: {
-                        select: {
-                          id: true,
-                          lastname: true,
-                          firstname: true,
-                          middlename: true,
-                          suffix: true,
-                          gender: true,
-                          birthdate: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              Customer: {
-                select: {
-                  id: true,
-                  address: true,
-                  phone: true,
-                  email: true,
-                  status: true,
-                  User: {
-                    select: {
-                      id: true,
-                      username: true,
-                      status: true,
-                      UserInformation: {
-                        select: {
-                          id: true,
-                          lastname: true,
-                          firstname: true,
-                          middlename: true,
-                          suffix: true,
-                          gender: true,
-                          birthdate: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              EventSupply: {
-                where: {
-                  status: "ok",
-                },
-                select: {
-                  id: true,
-                  quantity: true,
-                  status: true,
-                  Supply: {
-                    select: {
-                      id: true,
-                      name: true,
-                      brand: true,
-                      type: true,
-                      stock: true,
-                      status: true,
-                    },
-                  },
-                },
-              },
-            },
+            select: this.selectTemplate,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -219,87 +221,7 @@ class EventRouter {
                 },
               ],
             },
-            select: {
-              id: true,
-              datetimeStart: true,
-              datetimeEnd: true,
-              type: true,
-              name: true,
-              address: true,
-              status: true,
-              EventLog: {
-                select: {
-                  id: true,
-                  datetime: true,
-                  type: true,
-                  content: true,
-                  Operator: {
-                    select: {
-                      id: true,
-                      username: true,
-                      UserInformation: {
-                        select: {
-                          id: true,
-                          lastname: true,
-                          firstname: true,
-                          middlename: true,
-                          suffix: true,
-                          gender: true,
-                          birthdate: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              Customer: {
-                select: {
-                  id: true,
-                  address: true,
-                  phone: true,
-                  email: true,
-                  status: true,
-                  User: {
-                    select: {
-                      id: true,
-                      username: true,
-                      status: true,
-                      UserInformation: {
-                        select: {
-                          id: true,
-                          lastname: true,
-                          firstname: true,
-                          middlename: true,
-                          suffix: true,
-                          gender: true,
-                          birthdate: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              EventSupply: {
-                where: {
-                  status: "ok",
-                },
-                select: {
-                  id: true,
-                  quantity: true,
-                  status: true,
-                  Supply: {
-                    select: {
-                      id: true,
-                      name: true,
-                      brand: true,
-                      type: true,
-                      stock: true,
-                      status: true,
-                    },
-                  },
-                },
-              },
-            },
+            select: this.selectTemplate,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -331,87 +253,7 @@ class EventRouter {
             where: {
               id: req.body.id,
             },
-            select: {
-              id: true,
-              datetimeStart: true,
-              datetimeEnd: true,
-              type: true,
-              name: true,
-              address: true,
-              status: true,
-              EventLog: {
-                select: {
-                  id: true,
-                  datetime: true,
-                  type: true,
-                  content: true,
-                  Operator: {
-                    select: {
-                      id: true,
-                      username: true,
-                      UserInformation: {
-                        select: {
-                          id: true,
-                          lastname: true,
-                          firstname: true,
-                          middlename: true,
-                          suffix: true,
-                          gender: true,
-                          birthdate: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              Customer: {
-                select: {
-                  id: true,
-                  address: true,
-                  phone: true,
-                  email: true,
-                  status: true,
-                  User: {
-                    select: {
-                      id: true,
-                      username: true,
-                      status: true,
-                      UserInformation: {
-                        select: {
-                          id: true,
-                          lastname: true,
-                          firstname: true,
-                          middlename: true,
-                          suffix: true,
-                          gender: true,
-                          birthdate: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              EventSupply: {
-                where: {
-                  status: "ok",
-                },
-                select: {
-                  id: true,
-                  quantity: true,
-                  status: true,
-                  Supply: {
-                    select: {
-                      id: true,
-                      name: true,
-                      brand: true,
-                      type: true,
-                      stock: true,
-                      status: true,
-                    },
-                  },
-                },
-              },
-            },
+            select: this.selectTemplate,
           });
           if (!result) return res.status(400).send();
           console.log(

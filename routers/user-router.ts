@@ -18,7 +18,7 @@ class UserRouter {
   private selectRoute: string = "/select";
   private updateRoute: string = "/update";
 
-  private selectTemplate = {
+  private selectTemplate: object = {
     id: true,
     username: true,
     status: true,

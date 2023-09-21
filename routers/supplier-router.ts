@@ -15,6 +15,40 @@ class SupplierRouter {
   private selectRoute: string = "/select";
   private updateRoute: string = "/update";
 
+  private selectTemplate: object = {
+    id: true,
+    name: true,
+    address: true,
+    phone: true,
+    email: true,
+    status: true,
+    SupplierLog: {
+      select: {
+        id: true,
+        datetime: true,
+        type: true,
+        content: true,
+        Operator: {
+          select: {
+            id: true,
+            username: true,
+            UserInformation: {
+              select: {
+                id: true,
+                lastname: true,
+                firstname: true,
+                middlename: true,
+                suffix: true,
+                gender: true,
+                birthdate: true,
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+
   constructor() {
     this.router = Router();
     this.setCreateRoute();
@@ -77,39 +111,7 @@ class SupplierRouter {
             where: {
               OR: [{ status: "ok" }, { status: "flagged" }],
             },
-            select: {
-              id: true,
-              name: true,
-              address: true,
-              phone: true,
-              email: true,
-              status: true,
-              SupplierLog: {
-                select: {
-                  id: true,
-                  datetime: true,
-                  type: true,
-                  content: true,
-                  Operator: {
-                    select: {
-                      id: true,
-                      username: true,
-                      UserInformation: {
-                        select: {
-                          id: true,
-                          lastname: true,
-                          firstname: true,
-                          middlename: true,
-                          suffix: true,
-                          gender: true,
-                          birthdate: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
+            select: this.selectTemplate,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -152,39 +154,7 @@ class SupplierRouter {
                 },
               ],
             },
-            select: {
-              id: true,
-              name: true,
-              address: true,
-              phone: true,
-              email: true,
-              status: true,
-              SupplierLog: {
-                select: {
-                  id: true,
-                  datetime: true,
-                  type: true,
-                  content: true,
-                  Operator: {
-                    select: {
-                      id: true,
-                      username: true,
-                      UserInformation: {
-                        select: {
-                          id: true,
-                          lastname: true,
-                          firstname: true,
-                          middlename: true,
-                          suffix: true,
-                          gender: true,
-                          birthdate: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
+            select: this.selectTemplate,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -216,39 +186,7 @@ class SupplierRouter {
             where: {
               id: req.body.id,
             },
-            select: {
-              id: true,
-              name: true,
-              address: true,
-              phone: true,
-              email: true,
-              status: true,
-              SupplierLog: {
-                select: {
-                  id: true,
-                  datetime: true,
-                  type: true,
-                  content: true,
-                  Operator: {
-                    select: {
-                      id: true,
-                      username: true,
-                      UserInformation: {
-                        select: {
-                          id: true,
-                          lastname: true,
-                          firstname: true,
-                          middlename: true,
-                          suffix: true,
-                          gender: true,
-                          birthdate: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
+            select: this.selectTemplate,
           });
           if (!result) return res.status(400).send();
           console.log(
