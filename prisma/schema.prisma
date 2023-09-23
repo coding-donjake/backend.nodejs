@@ -22,7 +22,7 @@ model Admin {
 model AdminLog {
   id         String   @id @default(uuid())
   datetime   DateTime @default(now())
-  type       String   @db.VarChar(20)
+  type       String   @db.VarChar(255)
   content    Json     @db.Json
   Admin      Admin?   @relation(fields: [adminId], references: [id])
   adminId    String?
@@ -54,7 +54,7 @@ model Company {
 model CompanyLog {
   id         String   @id @default(uuid())
   datetime   DateTime @default(now())
-  type       String   @db.VarChar(20)
+  type       String   @db.VarChar(255)
   content    Json     @db.Json
   Company    Company? @relation(fields: [companyId], references: [id])
   companyId  String?
@@ -67,6 +67,11 @@ enum CompanyStatus {
   ok
   suspended
   removed
+}
+
+model StudentInformation {
+  id       String @id @default(uuid())
+  schoolId String @db.VarChar(255)
 }
 
 model User {
@@ -86,7 +91,7 @@ model User {
 model UserLog {
   id         String   @id @default(uuid())
   datetime   DateTime @default(now())
-  type       String   @db.VarChar(20)
+  type       String   @db.VarChar(255)
   content    Json     @db.Json
   User       User?    @relation(fields: [userId], references: [id])
   userId     String?
@@ -108,7 +113,7 @@ model UserInformation {
   lastname           String               @db.VarChar(255)
   firstname          String               @db.VarChar(255)
   middlename         String               @db.VarChar(255)
-  suffix             String               @db.VarChar(20)
+  suffix             String               @db.VarChar(255)
   gender             Gender
   birthdate          DateTime             @db.Date
   User               User?                @relation(fields: [userId], references: [id])
@@ -119,7 +124,7 @@ model UserInformation {
 model UserInformationLog {
   id                String           @id @default(uuid())
   datetime          DateTime         @default(now())
-  type              String           @db.VarChar(20)
+  type              String           @db.VarChar(255)
   content           Json             @db.Json
   UserInformation   UserInformation? @relation(fields: [userInformationId], references: [id])
   userInformationId String?
