@@ -40,6 +40,41 @@ enum AdminStatus {
   removed
 }
 
+model Application {
+  id               String            @id @default(uuid())
+  datetimeApplied  DateTime          @default(now())
+  datetimeAccepted DateTime?
+  datetimeDeclined DateTime?
+  pitch            String            @db.Text
+  status           ApplicationStatus
+  JobPost          JobPost?          @relation(fields: [jobPostId], references: [id])
+  jobPostId        String?
+  Resume           Resume?           @relation(fields: [resumeId], references: [id])
+  resumeId         String?
+  User             User?             @relation(fields: [userId], references: [id])
+  userId           String?
+  ApplicationLog   ApplicationLog[]
+}
+
+model ApplicationLog {
+  id            String       @id @default(uuid())
+  datetime      DateTime     @default(now())
+  type          String       @db.VarChar(255)
+  content       Json         @db.Json
+  Application   Application? @relation(fields: [applicationId], references: [id])
+  applicationId String?
+  Operator      User?        @relation("Operator", fields: [operatorId], references: [id])
+  operatorId    String?
+}
+
+enum ApplicationStatus {
+  ok
+  accepted
+  declined
+  cancelled
+  removed
+}
+
 model Company {
   id          String        @id @default(uuid())
   name        String        @db.VarChar(255)
@@ -48,7 +83,10 @@ model Company {
   email       String        @db.VarChar(255)
   type        String        @db.VarChar(255)
   status      CompanyStatus
+  JobPost     JobPost[]
   CompanyLog  CompanyLog[]
+  User        User?         @relation(fields: [userId], references: [id])
+  userId      String?
 }
 
 model CompanyLog {
@@ -69,23 +107,110 @@ enum CompanyStatus {
   removed
 }
 
+model JobPost {
+  id          String        @id @default(uuid())
+  position    String        @db.VarChar(255)
+  description String        @db.Text
+  type        JobPostType
+  slot        Int?
+  status      JobPostStatus
+  Application Application[]
+  JobPostLog  JobPostLog[]
+  Company     Company?      @relation(fields: [companyId], references: [id])
+  companyId   String?
+}
+
+model JobPostLog {
+  id         String   @id @default(uuid())
+  datetime   DateTime @default(now())
+  type       String   @db.VarChar(255)
+  content    Json     @db.Json
+  JobPost    JobPost? @relation(fields: [jobPostId], references: [id])
+  jobPostId  String?
+  Operator   User?    @relation("Operator", fields: [operatorId], references: [id])
+  operatorId String?
+}
+
+enum JobPostStatus {
+  ok
+  closed
+  removed
+}
+
+enum JobPostType {
+  intern
+  job
+}
+
+model Resume {
+  id          String        @id @default(uuid())
+  fileName    String        @db.VarChar(255)
+  storageName String        @db.VarChar(255)
+  status      ResumeStatus
+  User        User?         @relation(fields: [userId], references: [id])
+  userId      String?
+  Application Application[]
+  ResumeLog   ResumeLog[]
+}
+
+model ResumeLog {
+  id         String   @id @default(uuid())
+  datetime   DateTime @default(now())
+  type       String   @db.VarChar(255)
+  content    Json     @db.Json
+  Resume     Resume?  @relation(fields: [resumeId], references: [id])
+  resumeId   String?
+  Operator   User?    @relation("Operator", fields: [operatorId], references: [id])
+  operatorId String?
+}
+
+enum ResumeStatus {
+  ok
+  removed
+}
+
 model StudentInformation {
-  id       String @id @default(uuid())
-  schoolId String @db.VarChar(255)
+  id                    String                  @id @default(uuid())
+  schoolId              String                  @db.VarChar(255)
+  course                String                  @db.VarChar(255)
+  year                  Int
+  section               String                  @db.VarChar(255)
+  User                  User?                   @relation(fields: [userId], references: [id])
+  userId                String                  @unique
+  StudentInformationLog StudentInformationLog[]
+}
+
+model StudentInformationLog {
+  id                   String              @id @default(uuid())
+  datetime             DateTime            @default(now())
+  type                 String              @db.VarChar(255)
+  content              Json                @db.Json
+  StudentInformation   StudentInformation? @relation(fields: [studentInformationId], references: [id])
+  studentInformationId String              @unique
+  Operator             User?               @relation("Operator", fields: [operatorId], references: [id])
+  operatorId           String?
 }
 
 model User {
-  id                         String               @id @default(uuid())
-  username                   String               @unique @default(uuid())
-  password                   String               @db.VarChar(255)
-  status                     UserStatus           @default(unverified)
-  UserInformation            UserInformation?
-  Admin                      Admin?
-  UserLog                    UserLog[]
-  AdminLogOperator           AdminLog[]           @relation("Operator")
-  CompanyLogOperator         CompanyLog[]         @relation("Operator")
-  UserLogOperator            UserLog[]            @relation("Operator")
-  UserInformationLogOperator UserInformationLog[] @relation("Operator")
+  id                            String                  @id @default(uuid())
+  username                      String                  @unique @default(uuid())
+  password                      String                  @db.VarChar(255)
+  status                        UserStatus              @default(unverified)
+  Admin                         Admin?
+  Application                   Application[]
+  Company                       Company[]
+  Resume                        Resume[]
+  StudentInformation            StudentInformation?
+  UserInformation               UserInformation?
+  UserLog                       UserLog[]
+  AdminLogOperator              AdminLog[]              @relation("Operator")
+  ApplicationLogOperator        ApplicationLog[]        @relation("Operator")
+  CompanyLogOperator            CompanyLog[]            @relation("Operator")
+  JobPostLogOperator            JobPostLog[]            @relation("Operator")
+  ResumeLogOperator             ResumeLog[]             @relation("Operator")
+  StudentInformationLogOperator StudentInformationLog[] @relation("Operator")
+  UserLogOperator               UserLog[]               @relation("Operator")
+  UserInformationLogOperator    UserInformationLog[]    @relation("Operator")
 }
 
 model UserLog {
