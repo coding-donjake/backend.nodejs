@@ -21,6 +21,7 @@ class BorrowingRouter {
     datetimeReturned: true,
     remarksBorrowed: true,
     remarksReturned: true,
+    duration: true,
     status: true,
     BorrowingLog: {
       select: {
