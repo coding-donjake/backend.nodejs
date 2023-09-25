@@ -30,6 +30,16 @@ model AdminLog {
   operatorId String?
 }
 
+enum AdminRole {
+  admin
+  staff
+}
+
+enum AdminStatus {
+  ok
+  removed
+}
+
 model Customer {
   id          String         @id @default(uuid())
   address     String         @db.Text
@@ -51,6 +61,12 @@ model CustomerLog {
   customerId String?
   Operator   User?     @relation("Operator", fields: [operatorId], references: [id])
   operatorId String?
+}
+
+enum CustomerStatus {
+  ok
+  flagged
+  removed
 }
 
 model Event {
@@ -82,6 +98,14 @@ model EventLog {
   operatorId String?
 }
 
+enum EventStatus {
+  active
+  cancelled
+  completed
+  removed
+  unpaid
+}
+
 model EventSupply {
   id             String            @id @default(uuid())
   quantity       Int
@@ -102,6 +126,11 @@ model EventSupplyLog {
   eventSupplyId String?
   Operator      User?        @relation("Operator", fields: [operatorId], references: [id])
   operatorId    String?
+}
+
+enum EventSupplyStatus {
+  ok
+  removed
 }
 
 model Order {
@@ -127,6 +156,13 @@ model OrderLog {
   operatorId String?
 }
 
+enum OrderStatus {
+  active
+  arrived
+  cancelled
+  removed
+}
+
 model OrderSupply {
   id             String            @id @default(uuid())
   quantity       Int
@@ -149,6 +185,11 @@ model OrderSupplyLog {
   operatorId    String?
 }
 
+enum OrderSupplyStatus {
+  ok
+  removed
+}
+
 model Payment {
   id         String        @id @default(uuid())
   amount     Float
@@ -167,6 +208,11 @@ model PaymentLog {
   paymentId  String?
   Operator   User?    @relation("Operator", fields: [operatorId], references: [id])
   operatorId String?
+}
+
+enum PaymentStatus {
+  ok
+  removed
 }
 
 model Supplier {
@@ -189,6 +235,12 @@ model SupplierLog {
   supplierId String?
   Operator   User?     @relation("Operator", fields: [operatorId], references: [id])
   operatorId String?
+}
+
+enum SupplierStatus {
+  ok
+  flagged
+  removed
 }
 
 model Supply {
@@ -214,6 +266,11 @@ model SupplyLog {
   operatorId String?
 }
 
+enum SupplyStatus {
+  ok
+  removed
+}
+
 model Task {
   id               String         @id @default(uuid())
   datetimeDeadline DateTime
@@ -236,6 +293,13 @@ model TaskLog {
   operatorId String?
 }
 
+enum TaskStatus {
+  active
+  completed
+  onhold
+  removed
+}
+
 model TaskAssignee {
   id              String             @id @default(uuid())
   status          TaskAssigneeStatus @default(ok)
@@ -255,6 +319,11 @@ model TaskAssigneeLog {
   taskAssigneeId String?
   Operator       User?         @relation("Operator", fields: [operatorId], references: [id])
   operatorId     String?
+}
+
+enum TaskAssigneeStatus {
+  ok
+  removed
 }
 
 model User {
@@ -293,6 +362,15 @@ model UserLog {
   operatorId String?
 }
 
+enum UserStatus {
+  nur
+  unverified
+  ok
+  deactivated
+  removed
+  suspended
+}
+
 model UserInformation {
   id                 String               @id @default(uuid())
   lastname           String               @db.VarChar(255)
@@ -317,85 +395,7 @@ model UserInformationLog {
   operatorId        String?
 }
 
-enum AdminRole {
-  admin
-  staff
-}
-
-enum AdminStatus {
-  ok
-  removed
-}
-
-enum CustomerStatus {
-  ok
-  flagged
-  removed
-}
-
-enum EventStatus {
-  active
-  cancelled
-  completed
-  removed
-  unpaid
-}
-
-enum EventSupplyStatus {
-  ok
-  removed
-}
-
 enum Gender {
   male
   female
-}
-
-enum OrderStatus {
-  active
-  arrived
-  cancelled
-  removed
-}
-
-enum OrderSupplyStatus {
-  ok
-  removed
-}
-
-enum PaymentStatus {
-  ok
-  removed
-}
-
-enum SupplierStatus {
-  ok
-  flagged
-  removed
-}
-
-enum SupplyStatus {
-  ok
-  removed
-}
-
-enum TaskStatus {
-  active
-  completed
-  onhold
-  removed
-}
-
-enum TaskAssigneeStatus {
-  ok
-  removed
-}
-
-enum UserStatus {
-  nur
-  unverified
-  ok
-  deactivated
-  removed
-  suspended
 }

@@ -22,6 +22,9 @@ class CustomerRouter {
     email: true,
     status: true,
     CustomerLog: {
+      orderBy: {
+        datetime: "desc",
+      },
       select: {
         datetime: true,
         type: true,

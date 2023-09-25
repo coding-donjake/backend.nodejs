@@ -23,6 +23,9 @@ class SupplierRouter {
     email: true,
     status: true,
     SupplierLog: {
+      orderBy: {
+        datetime: "desc",
+      },
       select: {
         id: true,
         datetime: true,

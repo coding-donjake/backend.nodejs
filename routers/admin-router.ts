@@ -21,6 +21,9 @@ class AdminRouter {
     role: true,
     status: true,
     AdminLog: {
+      orderBy: {
+        datetime: "desc",
+      },
       select: {
         id: true,
         datetime: true,

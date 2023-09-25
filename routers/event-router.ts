@@ -24,6 +24,9 @@ class EventRouter {
     address: true,
     status: true,
     EventLog: {
+      orderBy: {
+        datetime: "desc",
+      },
       select: {
         id: true,
         datetime: true,

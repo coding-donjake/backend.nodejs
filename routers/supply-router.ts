@@ -23,6 +23,9 @@ class SupplyRouter {
     stock: true,
     status: true,
     SupplyLog: {
+      orderBy: {
+        datetime: "desc",
+      },
       select: {
         id: true,
         datetime: true,

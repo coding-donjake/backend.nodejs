@@ -22,6 +22,9 @@ class OrderRouter {
     datetimeArrived: true,
     status: true,
     OrderLog: {
+      orderBy: {
+        datetime: "desc",
+      },
       select: {
         id: true,
         datetime: true,

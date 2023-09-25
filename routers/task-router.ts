@@ -21,6 +21,9 @@ class TaskRouter {
     name: true,
     status: true,
     TaskLog: {
+      orderBy: {
+        datetime: "desc",
+      },
       select: {
         id: true,
         datetime: true,
