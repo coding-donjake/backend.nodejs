@@ -23,6 +23,9 @@ class AssetRouter {
     serialCode: true,
     status: true,
     AssetLog: {
+      orderBy: {
+        datetime: "desc",
+      },
       select: {
         id: true,
         datetime: true,

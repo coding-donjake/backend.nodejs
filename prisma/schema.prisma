@@ -30,6 +30,16 @@ model AdminLog {
   operatorId String?
 }
 
+enum AdminRole {
+  admin
+  staff
+}
+
+enum AdminStatus {
+  ok
+  removed
+}
+
 model Asset {
   id         String      @id @default(uuid())
   name       String      @db.VarChar(255)
@@ -50,6 +60,12 @@ model AssetLog {
   assetId    String?
   Operator   User?    @relation("Operator", fields: [operatorId], references: [id])
   operatorId String?
+}
+
+enum AssetStatus {
+  good
+  broken
+  removed
 }
 
 model Borrowing {
@@ -76,6 +92,14 @@ model BorrowingLog {
   borrowingId String?
   Operator    User?      @relation("Operator", fields: [operatorId], references: [id])
   operatorId  String?
+}
+
+enum BorrowingStatus {
+  pending
+  active
+  completed
+  declined
+  removed
 }
 
 model User {
@@ -105,6 +129,15 @@ model UserLog {
   operatorId String?
 }
 
+enum UserStatus {
+  nur
+  unverified
+  ok
+  deactivated
+  removed
+  suspended
+}
+
 model UserInformation {
   id                 String               @id @default(uuid())
   lastname           String               @db.VarChar(255)
@@ -129,40 +162,7 @@ model UserInformationLog {
   operatorId        String?
 }
 
-enum AdminRole {
-  admin
-  staff
-}
-
-enum AdminStatus {
-  ok
-  removed
-}
-
-enum AssetStatus {
-  good
-  broken
-  removed
-}
-
-enum BorrowingStatus {
-  pending
-  active
-  completed
-  declined
-  removed
-}
-
 enum Gender {
   male
   female
-}
-
-enum UserStatus {
-  nur
-  unverified
-  ok
-  deactivated
-  removed
-  suspended
 }

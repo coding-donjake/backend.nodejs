@@ -9,8 +9,10 @@ class BorrowingRouter {
     AuthenticationService.getInstance();
   private prismaService: PrismaService = PrismaService.getInstance();
 
+  private activeRoute: string = "/active";
   private createRoute: string = "/create";
   private getRoute: string = "/get";
+  private pendingRoute: string = "/pending";
   private searchRoute: string = "/search";
   private selectRoute: string = "/select";
   private updateRoute: string = "/update";
@@ -24,6 +26,9 @@ class BorrowingRouter {
     duration: true,
     status: true,
     BorrowingLog: {
+      orderBy: {
+        datetime: "desc",
+      },
       select: {
         id: true,
         datetime: true,
@@ -54,6 +59,7 @@ class BorrowingRouter {
         name: true,
         brand: true,
         type: true,
+        serialCode: true,
         status: true,
       },
     },
@@ -79,12 +85,47 @@ class BorrowingRouter {
 
   constructor() {
     this.router = Router();
+    this.setActiveRoute();
     this.setCreateRoute();
     this.setGetRoute();
+    this.setPendingRoute();
     this.setSearchRoute();
     this.setSelectRoute();
     this.setUpdateRoute();
   }
+
+  private setActiveRoute = async () => {
+    this.router.post(
+      this.activeRoute,
+      [this.authService.verifyToken, this.authService.verifyUser],
+      async (req: Request, res: Response) => {
+        try {
+          let result = await this.prismaService.prisma.borrowing.findMany({
+            where: {
+              OR: [{ status: "active" }, { User: { id: req.body.key } }],
+            },
+            orderBy: [
+              {
+                datetimeBorrowed: "asc",
+              },
+            ],
+            select: this.selectTemplate,
+          });
+          if (!result) return res.status(400).send();
+          console.log(
+            `${result.length} borrowing sent to user ${req.body.decodedToken.id}.`
+          );
+          res.status(200).json({ data: result });
+        } catch (error) {
+          console.error(error);
+          res.status(500).json({
+            status: "server error",
+            msg: error,
+          });
+        }
+      }
+    );
+  };
 
   private setCreateRoute = async () => {
     this.router.post(
@@ -141,6 +182,44 @@ class BorrowingRouter {
                 { status: "declined" },
               ],
             },
+            orderBy: [
+              {
+                datetimeBorrowed: "asc",
+              },
+            ],
+            select: this.selectTemplate,
+          });
+          if (!result) return res.status(400).send();
+          console.log(
+            `${result.length} borrowing sent to user ${req.body.decodedToken.id}.`
+          );
+          res.status(200).json({ data: result });
+        } catch (error) {
+          console.error(error);
+          res.status(500).json({
+            status: "server error",
+            msg: error,
+          });
+        }
+      }
+    );
+  };
+
+  private setPendingRoute = async () => {
+    this.router.post(
+      this.pendingRoute,
+      [this.authService.verifyToken, this.authService.verifyUser],
+      async (req: Request, res: Response) => {
+        try {
+          let result = await this.prismaService.prisma.borrowing.findMany({
+            where: {
+              OR: [{ status: "pending" }, { User: { id: req.body.key } }],
+            },
+            orderBy: [
+              {
+                datetimeBorrowed: "asc",
+              },
+            ],
             select: this.selectTemplate,
           });
           if (!result) return res.status(400).send();
@@ -198,6 +277,11 @@ class BorrowingRouter {
                 },
               ],
             },
+            orderBy: [
+              {
+                datetimeBorrowed: "asc",
+              },
+            ],
             select: this.selectTemplate,
           });
           if (!result) return res.status(400).send();
@@ -226,7 +310,7 @@ class BorrowingRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.borrowing.findMany({
+          let result = await this.prismaService.prisma.borrowing.findFirst({
             where: {
               id: req.body.id,
             },
@@ -234,7 +318,7 @@ class BorrowingRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} borrowing sent to user ${req.body.decodedToken.id}.`
+            `borrowing record has been sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
