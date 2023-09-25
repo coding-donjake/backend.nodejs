@@ -23,6 +23,9 @@ class UserRouter {
     username: true,
     status: true,
     UserLog: {
+      orderBy: {
+        datetime: "desc",
+      },
       select: {
         id: true,
         datetime: true,
@@ -57,6 +60,9 @@ class UserRouter {
         gender: true,
         birthdate: true,
         UserInformationLog: {
+          orderBy: {
+            datetime: "desc",
+          },
           select: {
             id: true,
             datetime: true,

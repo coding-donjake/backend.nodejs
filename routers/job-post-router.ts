@@ -32,6 +32,9 @@ class JobPostRouter {
       status: true,
     },
     JobPostLog: {
+      orderBy: {
+        datetime: "desc",
+      },
       select: {
         id: true,
         datetime: true,

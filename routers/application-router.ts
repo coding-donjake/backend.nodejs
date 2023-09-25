@@ -23,6 +23,9 @@ class ApplicationRouter {
     pitch: true,
     status: true,
     ApplicationLog: {
+      orderBy: {
+        datetime: "desc",
+      },
       select: {
         id: true,
         datetime: true,

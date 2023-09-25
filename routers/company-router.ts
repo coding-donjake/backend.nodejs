@@ -43,6 +43,9 @@ class CompanyRouter {
       },
     },
     CompanyLog: {
+      orderBy: {
+        datetime: "desc",
+      },
       select: {
         id: true,
         datetime: true,

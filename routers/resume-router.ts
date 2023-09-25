@@ -20,6 +20,9 @@ class ResumeRouter {
     storageName: true,
     status: true,
     ResumeLog: {
+      orderBy: {
+        datetime: "desc",
+      },
       select: {
         id: true,
         datetime: true,
