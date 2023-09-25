@@ -21,6 +21,9 @@ class AdminRouter {
     role: true,
     status: true,
     AdminLog: {
+      orderBy: {
+        datetime: "desc",
+      },
       select: {
         id: true,
         datetime: true,
@@ -90,6 +93,38 @@ class AdminRouter {
               req.body.data
             )}`
           );
+          const check = await this.prismaService.prisma.admin.findFirst({
+            where: {
+              userId: req.body.data.userId,
+            },
+            select: {
+              id: true,
+              role: true,
+              status: true,
+              userId: true,
+            },
+          });
+          if (check) {
+            await this.prismaService.prisma.admin.update({
+              where: { userId: req.body.data.userId },
+              data: {
+                status: "ok",
+              },
+            });
+            req.body.data.console.log(
+              `Admin recycled: ${JSON.stringify(check)}`
+            );
+            await this.prismaService.prisma.adminLog.create({
+              data: {
+                type: "create",
+                adminId: check.id,
+                operatorId: req.body.decodedToken.id,
+                content: check,
+              },
+            });
+            res.status(200).json({ id: check.id });
+            return;
+          }
           const admin = await this.prismaService.prisma.admin.create({
             data: req.body.data,
           });
