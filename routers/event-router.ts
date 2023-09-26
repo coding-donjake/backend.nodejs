@@ -17,8 +17,8 @@ class EventRouter {
 
   private selectTemplate: object = {
     id: true,
-    datetimeStart: true,
-    datetimeEnd: true,
+    datetimeStarted: true,
+    datetimeEnded: true,
     type: true,
     name: true,
     address: true,
