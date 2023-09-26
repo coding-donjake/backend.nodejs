@@ -16,6 +16,8 @@ class BorrowingRouter {
   private searchRoute: string = "/search";
   private selectRoute: string = "/select";
   private updateRoute: string = "/update";
+  private userActiveRoute: string = "/user-active";
+  private userPendingRoute: string = "/user-pending";
 
   private selectTemplate: object = {
     id: true,
@@ -92,6 +94,8 @@ class BorrowingRouter {
     this.setSearchRoute();
     this.setSelectRoute();
     this.setUpdateRoute();
+    this.setUserActiveRoute();
+    this.setUserPendingRoute();
   }
 
   private setActiveRoute = async () => {
@@ -363,6 +367,75 @@ class BorrowingRouter {
             },
           });
           res.status(200).send();
+        } catch (error) {
+          console.error(error);
+          res.status(500).json({
+            status: "server error",
+            msg: error,
+          });
+        }
+      }
+    );
+  };
+
+  private setUserActiveRoute = async () => {
+    this.router.post(
+      this.userActiveRoute,
+      [this.authService.verifyToken, this.authService.verifyUser],
+      async (req: Request, res: Response) => {
+        try {
+          let result = await this.prismaService.prisma.borrowing.findMany({
+            where: {
+              AND: [{ status: "active" }, { userId: req.body.decodedToken.id }],
+            },
+            orderBy: [
+              {
+                datetimeBorrowed: "asc",
+              },
+            ],
+            select: this.selectTemplate,
+          });
+          if (!result) return res.status(400).send();
+          console.log(
+            `${result.length} borrowing sent to user ${req.body.decodedToken.id}.`
+          );
+          res.status(200).json({ data: result });
+        } catch (error) {
+          console.error(error);
+          res.status(500).json({
+            status: "server error",
+            msg: error,
+          });
+        }
+      }
+    );
+  };
+
+  private setUserPendingRoute = async () => {
+    this.router.post(
+      this.userPendingRoute,
+      [this.authService.verifyToken, this.authService.verifyUser],
+      async (req: Request, res: Response) => {
+        try {
+          let result = await this.prismaService.prisma.borrowing.findMany({
+            where: {
+              AND: [
+                { status: "pending" },
+                { userId: req.body.decodedToken.id },
+              ],
+            },
+            orderBy: [
+              {
+                datetimeBorrowed: "asc",
+              },
+            ],
+            select: this.selectTemplate,
+          });
+          if (!result) return res.status(400).send();
+          console.log(
+            `${result.length} borrowing sent to user ${req.body.decodedToken.id}.`
+          );
+          res.status(200).json({ data: result });
         } catch (error) {
           console.error(error);
           res.status(500).json({

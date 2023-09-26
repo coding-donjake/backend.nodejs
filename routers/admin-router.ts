@@ -111,9 +111,7 @@ class AdminRouter {
                 status: "ok",
               },
             });
-            req.body.data.console.log(
-              `Admin recycled: ${JSON.stringify(check)}`
-            );
+            console.log(`Admin recycled: ${JSON.stringify(check)}`);
             await this.prismaService.prisma.adminLog.create({
               data: {
                 type: "create",

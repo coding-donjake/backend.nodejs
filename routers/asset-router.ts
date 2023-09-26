@@ -180,7 +180,7 @@ class AssetRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.asset.findMany({
+          let result = await this.prismaService.prisma.asset.findFirst({
             where: {
               id: req.body.id,
             },
@@ -188,7 +188,7 @@ class AssetRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} assets sent to user ${req.body.decodedToken.id}.`
+            `asset record has been sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
