@@ -209,15 +209,15 @@ class EventRouter {
                 {
                   OR: [
                     {
-                      datetimeStart: {
-                        gte: req.body.datetimeStart.start,
-                        lte: req.body.datetimeStart.end,
+                      datetimeStarted: {
+                        gte: req.body.datetimeStarted.start,
+                        lte: req.body.datetimeStarted.end,
                       },
                     },
                     {
-                      datetimeEnd: {
-                        gte: req.body.datetimeEnd.start,
-                        lte: req.body.datetimeEnd.end,
+                      datetimeEnded: {
+                        gte: req.body.datetimeEnded.start,
+                        lte: req.body.datetimeEnded.end,
                       },
                     },
                   ],
@@ -252,7 +252,7 @@ class EventRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.event.findMany({
+          let result = await this.prismaService.prisma.event.findFirst({
             where: {
               id: req.body.id,
             },
@@ -260,7 +260,7 @@ class EventRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} events sent to user ${req.body.decodedToken.id}.`
+            `event record has been sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {

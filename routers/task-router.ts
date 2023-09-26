@@ -222,7 +222,7 @@ class TaskRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.task.findMany({
+          let result = await this.prismaService.prisma.task.findFirst({
             where: {
               id: req.body.id,
             },
@@ -230,7 +230,7 @@ class TaskRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} tasks sent to user ${req.body.decodedToken.id}.`
+            `task record has been sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {

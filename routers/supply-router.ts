@@ -183,7 +183,7 @@ class SupplyRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.supply.findMany({
+          let result = await this.prismaService.prisma.supply.findFirst({
             where: {
               id: req.body.id,
             },
@@ -191,7 +191,7 @@ class SupplyRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} supplies sent to user ${req.body.decodedToken.id}.`
+            `supply record has been sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {

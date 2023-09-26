@@ -237,7 +237,7 @@ class OrderRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.order.findMany({
+          let result = await this.prismaService.prisma.order.findFirst({
             where: {
               id: req.body.id,
             },
@@ -245,7 +245,7 @@ class OrderRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} orders sent to user ${req.body.decodedToken.id}.`
+            `order record has been sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {

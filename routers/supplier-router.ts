@@ -185,7 +185,7 @@ class SupplierRouter {
       ],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.supplier.findMany({
+          let result = await this.prismaService.prisma.supplier.findFirst({
             where: {
               id: req.body.id,
             },
@@ -193,7 +193,7 @@ class SupplierRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} suppliers sent to user ${req.body.decodedToken.id}.`
+            `supplier record has been sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
