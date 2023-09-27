@@ -120,8 +120,20 @@ class UserRouter {
               req.body.data
             )}`
           );
-          const checkUsernameExists = await this.prismaService.prisma.user
-            .findMany;
+          if (req.body.data.username) {
+            const checkUsernameExists =
+              await this.prismaService.prisma.user.findFirst({
+                where: {
+                  username: req.body.data.username,
+                },
+              });
+            if (checkUsernameExists) {
+              console.log(
+                `Username ${req.body.data.username} already been used.`
+              );
+              return res.status(409).send();
+            }
+          }
           const user = await this.prismaService.prisma.user.create({
             data: req.body.data,
           });
