@@ -152,7 +152,6 @@ class SupplierRouter {
                     { address: req.body.key },
                     { phone: req.body.key },
                     { email: req.body.key },
-                    { status: req.body.key },
                   ],
                 },
               ],
