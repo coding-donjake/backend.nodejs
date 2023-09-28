@@ -9,9 +9,11 @@ class EventRouter {
     AuthenticationService.getInstance();
   private prismaService: PrismaService = PrismaService.getInstance();
 
+  private activeRoute: string = "/active";
   private createRoute: string = "/create";
   private getRoute: string = "/get";
   private searchRoute: string = "/search";
+  private searchActiveRoute: string = "/search-active";
   private selectRoute: string = "/select";
   private updateRoute: string = "/update";
 
@@ -22,6 +24,8 @@ class EventRouter {
     type: true,
     name: true,
     address: true,
+    price: true,
+    balance: true,
     status: true,
     EventLog: {
       orderBy: {
@@ -102,12 +106,46 @@ class EventRouter {
 
   constructor() {
     this.router = Router();
+    this.setActiveRoute();
     this.setCreateRoute();
     this.setGetRoute();
     this.setSearchRoute();
+    this.setSearchActiveRoute();
     this.setSelectRoute();
     this.setUpdateRoute();
   }
+
+  private setActiveRoute = async () => {
+    this.router.post(
+      this.activeRoute,
+      [
+        this.authService.verifyToken,
+        this.authService.verifyUser,
+        this.authService.verifyAdmin,
+      ],
+      async (req: Request, res: Response) => {
+        try {
+          let result = await this.prismaService.prisma.event.findMany({
+            where: {
+              OR: [{ status: "active" }],
+            },
+            select: this.selectTemplate,
+          });
+          if (!result) return res.status(400).send();
+          console.log(
+            `${result.length} events sent to user ${req.body.decodedToken.id}.`
+          );
+          res.status(200).json({ data: result });
+        } catch (error) {
+          console.error(error);
+          res.status(500).json({
+            status: "server error",
+            msg: error,
+          });
+        }
+      }
+    );
+  };
 
   private setCreateRoute = async () => {
     this.router.post(
@@ -218,6 +256,112 @@ class EventRouter {
                       datetimeEnded: {
                         gte: req.body.datetimeEnded.start,
                         lte: req.body.datetimeEnded.end,
+                      },
+                    },
+                    {
+                      Customer: {
+                        User: {
+                          UserInformation: {
+                            lastname: req.body.key,
+                          },
+                        },
+                      },
+                    },
+                    {
+                      Customer: {
+                        User: {
+                          UserInformation: {
+                            firstname: req.body.key,
+                          },
+                        },
+                      },
+                    },
+                    {
+                      Customer: {
+                        User: {
+                          UserInformation: {
+                            middlename: req.body.key,
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+            select: this.selectTemplate,
+          });
+          if (!result) return res.status(400).send();
+          console.log(
+            `${result.length} events sent to user ${req.body.decodedToken.id}.`
+          );
+          res.status(200).json({ data: result });
+        } catch (error) {
+          console.error(error);
+          res.status(500).json({
+            status: "server error",
+            msg: error,
+          });
+        }
+      }
+    );
+  };
+
+  private setSearchActiveRoute = async () => {
+    this.router.post(
+      this.searchActiveRoute,
+      [
+        this.authService.verifyToken,
+        this.authService.verifyUser,
+        this.authService.verifyAdmin,
+      ],
+      async (req: Request, res: Response) => {
+        try {
+          let result = await this.prismaService.prisma.event.findMany({
+            where: {
+              AND: [
+                {
+                  OR: [{ status: "active" }],
+                },
+                {
+                  OR: [
+                    {
+                      datetimeStarted: {
+                        gte: req.body.datetimeStarted.start,
+                        lte: req.body.datetimeStarted.end,
+                      },
+                    },
+                    {
+                      datetimeEnded: {
+                        gte: req.body.datetimeEnded.start,
+                        lte: req.body.datetimeEnded.end,
+                      },
+                    },
+                    {
+                      Customer: {
+                        User: {
+                          UserInformation: {
+                            lastname: req.body.key,
+                          },
+                        },
+                      },
+                    },
+                    {
+                      Customer: {
+                        User: {
+                          UserInformation: {
+                            firstname: req.body.key,
+                          },
+                        },
+                      },
+                    },
+                    {
+                      Customer: {
+                        User: {
+                          UserInformation: {
+                            middlename: req.body.key,
+                          },
+                        },
                       },
                     },
                   ],

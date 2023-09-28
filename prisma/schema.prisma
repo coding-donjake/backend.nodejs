@@ -72,7 +72,7 @@ enum CustomerStatus {
 model Event {
   id              String        @id @default(uuid())
   datetimeStarted DateTime
-  datetimeEnded   DateTime
+  datetimeEnded   DateTime?
   type            String        @db.VarChar(20)
   name            String        @db.VarChar(255)
   address         String        @db.Text
