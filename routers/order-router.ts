@@ -11,6 +11,7 @@ class OrderRouter {
 
   private createRoute: string = "/create";
   private getRoute: string = "/get";
+  private getActiveRoute: string = "/get-active";
   private searchRoute: string = "/search";
   private selectRoute: string = "/select";
   private updateRoute: string = "/update";
@@ -85,6 +86,7 @@ class OrderRouter {
     this.router = Router();
     this.setCreateRoute();
     this.setGetRoute();
+    this.setGetActiveRoute();
     this.setSearchRoute();
     this.setSelectRoute();
     this.setUpdateRoute();
@@ -147,6 +149,40 @@ class OrderRouter {
                 { status: "cancelled" },
               ],
             },
+            orderBy: [{ datetimeOrdered: "asc" }],
+            select: this.selectTemplate,
+          });
+          if (!result) return res.status(400).send();
+          console.log(
+            `${result.length} orders sent to user ${req.body.decodedToken.id}.`
+          );
+          res.status(200).json({ data: result });
+        } catch (error) {
+          console.error(error);
+          res.status(500).json({
+            status: "server error",
+            msg: error,
+          });
+        }
+      }
+    );
+  };
+
+  private setGetActiveRoute = async () => {
+    this.router.post(
+      this.getActiveRoute,
+      [
+        this.authService.verifyToken,
+        this.authService.verifyUser,
+        this.authService.verifyAdmin,
+      ],
+      async (req: Request, res: Response) => {
+        try {
+          let result = await this.prismaService.prisma.order.findMany({
+            where: {
+              OR: [{ status: "active" }],
+            },
+            orderBy: [{ datetimeOrdered: "asc" }],
             select: this.selectTemplate,
           });
           if (!result) return res.status(400).send();
