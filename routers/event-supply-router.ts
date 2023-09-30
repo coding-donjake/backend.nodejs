@@ -21,11 +21,7 @@ class EventSupplyRouter {
   private setCreateRoute = async () => {
     this.router.post(
       this.createRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
           console.log(
@@ -63,11 +59,7 @@ class EventSupplyRouter {
   private setUpdateRoute = async () => {
     this.router.post(
       this.updateRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
           console.log(

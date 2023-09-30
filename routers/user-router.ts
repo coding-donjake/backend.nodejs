@@ -104,11 +104,7 @@ class UserRouter {
   private setCreateRoute = async () => {
     this.router.post(
       this.createRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         req.body.data.password = await this.hashService.hashPassword(
           req.body.data.password,
@@ -161,11 +157,7 @@ class UserRouter {
   private setGetRoute = async () => {
     this.router.post(
       this.getRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
           let result = await this.prismaService.prisma.user.findMany({
@@ -225,11 +217,7 @@ class UserRouter {
   private setSearchRoute = async () => {
     this.router.post(
       this.searchRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
           let result = await this.prismaService.prisma.user.findMany({
@@ -279,11 +267,7 @@ class UserRouter {
   private setSelectRoute = async () => {
     this.router.post(
       this.selectRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
           let result = await this.prismaService.prisma.user.findFirst({

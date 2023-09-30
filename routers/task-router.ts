@@ -87,11 +87,7 @@ class TaskRouter {
   private setCreateRoute = async () => {
     this.router.post(
       this.createRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
           console.log(
@@ -126,11 +122,7 @@ class TaskRouter {
   private setGetRoute = async () => {
     this.router.post(
       this.getRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
           let result = await this.prismaService.prisma.task.findMany({
@@ -162,11 +154,7 @@ class TaskRouter {
   private setSearchRoute = async () => {
     this.router.post(
       this.searchRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
           let result = await this.prismaService.prisma.task.findMany({
@@ -215,11 +203,7 @@ class TaskRouter {
   private setSelectRoute = async () => {
     this.router.post(
       this.selectRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
           let result = await this.prismaService.prisma.task.findFirst({
@@ -247,11 +231,7 @@ class TaskRouter {
   private setUpdateRoute = async () => {
     this.router.post(
       this.updateRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
           console.log(

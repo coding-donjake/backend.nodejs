@@ -95,11 +95,7 @@ class OrderRouter {
   private setCreateRoute = async () => {
     this.router.post(
       this.createRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
           console.log(
@@ -134,11 +130,7 @@ class OrderRouter {
   private setGetRoute = async () => {
     this.router.post(
       this.getRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
           let result = await this.prismaService.prisma.order.findMany({
@@ -171,11 +163,7 @@ class OrderRouter {
   private setGetActiveRoute = async () => {
     this.router.post(
       this.getActiveRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
           let result = await this.prismaService.prisma.order.findMany({
@@ -204,11 +192,7 @@ class OrderRouter {
   private setSearchRoute = async () => {
     this.router.post(
       this.searchRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
           let result = await this.prismaService.prisma.order.findMany({
@@ -266,11 +250,7 @@ class OrderRouter {
   private setSelectRoute = async () => {
     this.router.post(
       this.selectRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
           let result = await this.prismaService.prisma.order.findFirst({
@@ -298,11 +278,7 @@ class OrderRouter {
   private setUpdateRoute = async () => {
     this.router.post(
       this.updateRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
           console.log(

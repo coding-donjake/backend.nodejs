@@ -64,11 +64,7 @@ class SupplierRouter {
   private setCreateRoute = async () => {
     this.router.post(
       this.createRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
           console.log(
@@ -103,11 +99,7 @@ class SupplierRouter {
   private setGetRoute = async () => {
     this.router.post(
       this.getRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
           let result = await this.prismaService.prisma.supplier.findMany({
@@ -135,11 +127,7 @@ class SupplierRouter {
   private setSearchRoute = async () => {
     this.router.post(
       this.searchRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
           let result = await this.prismaService.prisma.supplier.findMany({
@@ -177,11 +165,7 @@ class SupplierRouter {
   private setSelectRoute = async () => {
     this.router.post(
       this.selectRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
           let result = await this.prismaService.prisma.supplier.findFirst({
@@ -209,11 +193,7 @@ class SupplierRouter {
   private setUpdateRoute = async () => {
     this.router.post(
       this.updateRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
           console.log(

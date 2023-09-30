@@ -136,8 +136,8 @@ enum EventSupplyStatus {
 model Order {
   id               String        @id @default(uuid())
   datetimeOrdered  DateTime
-  datetimeExpected DateTime
-  datetimeArrived  DateTime
+  datetimeExpected DateTime?
+  datetimeArrived  DateTime?
   status           OrderStatus   @default(active)
   OrderSupply      OrderSupply[]
   Supplier         Supplier?     @relation(fields: [supplierId], references: [id])
