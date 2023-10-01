@@ -16,7 +16,7 @@ class CompanyRouter {
   private selectRoute: string = "/select";
   private updateRoute: string = "/update";
 
-  private selectTemplate: object = {
+  private select: object = {
     id: true,
     name: true,
     description: true,
@@ -135,7 +135,7 @@ class CompanyRouter {
             where: {
               OR: [{ status: "ok" }],
             },
-            select: this.selectTemplate,
+            select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -210,7 +210,7 @@ class CompanyRouter {
                 },
               ],
             },
-            select: this.selectTemplate,
+            select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -242,7 +242,7 @@ class CompanyRouter {
             where: {
               id: req.body.id,
             },
-            select: this.selectTemplate,
+            select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(

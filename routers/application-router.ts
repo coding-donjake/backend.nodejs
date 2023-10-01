@@ -15,7 +15,7 @@ class ApplicationRouter {
   private selectRoute: string = "/select";
   private updateRoute: string = "/update";
 
-  private selectTemplate: object = {
+  private select: object = {
     id: true,
     datetimeApplied: true,
     datetimeAccepted: true,
@@ -148,7 +148,7 @@ class ApplicationRouter {
             where: {
               OR: [{ status: "ok" }],
             },
-            select: this.selectTemplate,
+            select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -237,7 +237,7 @@ class ApplicationRouter {
                 },
               ],
             },
-            select: this.selectTemplate,
+            select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -269,7 +269,7 @@ class ApplicationRouter {
             where: {
               id: req.body.id,
             },
-            select: this.selectTemplate,
+            select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(

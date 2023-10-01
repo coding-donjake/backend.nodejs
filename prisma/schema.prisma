@@ -46,7 +46,7 @@ model Application {
   datetimeAccepted DateTime?
   datetimeDeclined DateTime?
   pitch            String            @db.Text
-  status           ApplicationStatus
+  status           ApplicationStatus @default(pending)
   JobPost          JobPost?          @relation(fields: [jobPostId], references: [id])
   jobPostId        String?
   Resume           Resume?           @relation(fields: [resumeId], references: [id])
@@ -68,7 +68,7 @@ model ApplicationLog {
 }
 
 enum ApplicationStatus {
-  ok
+  pending
   accepted
   declined
   cancelled
@@ -82,7 +82,7 @@ model Company {
   address     String        @db.VarChar(255)
   email       String        @db.VarChar(255)
   type        String        @db.VarChar(255)
-  status      CompanyStatus
+  status      CompanyStatus @default(unverified)
   JobPost     JobPost[]
   CompanyLog  CompanyLog[]
   User        User?         @relation(fields: [userId], references: [id])
@@ -112,8 +112,8 @@ model JobPost {
   position    String        @db.VarChar(255)
   description String        @db.Text
   type        JobPostType
-  slot        Int?
-  status      JobPostStatus
+  slots       Int?
+  status      JobPostStatus @default(ok)
   Application Application[]
   JobPostLog  JobPostLog[]
   Company     Company?      @relation(fields: [companyId], references: [id])
@@ -146,7 +146,7 @@ model Resume {
   id          String        @id @default(uuid())
   fileName    String        @db.VarChar(255)
   storageName String        @db.VarChar(255)
-  status      ResumeStatus
+  status      ResumeStatus  @default(ok)
   User        User?         @relation(fields: [userId], references: [id])
   userId      String?
   Application Application[]
