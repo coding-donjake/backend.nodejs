@@ -40,14 +40,6 @@ class UserInformationRouter {
           console.log(
             `User information created: ${JSON.stringify(userInformation)}`
           );
-          await this.prismaService.prisma.userInformationLog.create({
-            data: {
-              type: "create",
-              userInformationId: userInformation.id,
-              operatorId: req.body.decodedToken.id,
-              content: userInformation,
-            },
-          });
           res.status(200).json({ id: userInformation.id });
         } catch (error) {
           console.error(error);
@@ -82,14 +74,6 @@ class UserInformationRouter {
           if (!result) return res.status(400).send();
           console.log(`User ${req.body.id} updated.`);
           req.body.data.id = req.body.id;
-          await this.prismaService.prisma.userInformationLog.create({
-            data: {
-              type: "update",
-              userInformationId: req.body.id,
-              operatorId: req.body.decodedToken.id,
-              content: req.body.data,
-            },
-          });
           res.status(200).send();
         } catch (error) {
           console.error(error);

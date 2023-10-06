@@ -59,34 +59,6 @@ class UserRouter {
         suffix: true,
         gender: true,
         birthdate: true,
-        UserInformationLog: {
-          orderBy: {
-            datetime: "desc",
-          },
-          select: {
-            id: true,
-            datetime: true,
-            type: true,
-            content: true,
-            Operator: {
-              select: {
-                id: true,
-                username: true,
-                UserInformation: {
-                  select: {
-                    id: true,
-                    lastname: true,
-                    firstname: true,
-                    middlename: true,
-                    suffix: true,
-                    gender: true,
-                    birthdate: true,
-                  },
-                },
-              },
-            },
-          },
-        },
       },
     },
   };
@@ -181,6 +153,7 @@ class UserRouter {
             where: {
               OR: [{ status: "ok" }, { status: "unverified" }],
             },
+            orderBy: this.orderBy,
             select: this.select,
           });
           if (!result) return res.status(400).send();
@@ -267,6 +240,7 @@ class UserRouter {
                 },
               ],
             },
+            orderBy: this.orderBy,
             select: this.select,
           });
           if (!result) return res.status(400).send();
