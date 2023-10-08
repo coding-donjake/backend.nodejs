@@ -248,7 +248,7 @@ model Supply {
   name        String        @db.VarChar(255)
   brand       String        @db.VarChar(255)
   type        String        @db.VarChar(255)
-  stock       Int
+  stock       Int?          @default(0)
   status      SupplyStatus  @default(ok)
   EventSupply EventSupply[]
   OrderSupply OrderSupply[]
