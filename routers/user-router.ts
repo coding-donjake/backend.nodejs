@@ -18,7 +18,7 @@ class UserRouter {
   private selectRoute: string = "/select";
   private updateRoute: string = "/update";
 
-  private selectTemplate: object = {
+  private select: object = {
     id: true,
     username: true,
     status: true,
@@ -164,7 +164,7 @@ class UserRouter {
             where: {
               OR: [{ status: "ok" }, { status: "unverified" }],
             },
-            select: this.selectTemplate,
+            select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -246,7 +246,7 @@ class UserRouter {
                 },
               ],
             },
-            select: this.selectTemplate,
+            select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -274,7 +274,7 @@ class UserRouter {
             where: {
               id: req.body.id,
             },
-            select: this.selectTemplate,
+            select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(

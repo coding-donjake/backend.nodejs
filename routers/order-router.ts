@@ -16,7 +16,7 @@ class OrderRouter {
   private selectRoute: string = "/select";
   private updateRoute: string = "/update";
 
-  private selectTemplate: object = {
+  private select: object = {
     id: true,
     datetimeOrdered: true,
     datetimeExpected: true,
@@ -142,7 +142,7 @@ class OrderRouter {
               ],
             },
             orderBy: [{ datetimeOrdered: "asc" }],
-            select: this.selectTemplate,
+            select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -171,7 +171,7 @@ class OrderRouter {
               OR: [{ status: "active" }],
             },
             orderBy: [{ datetimeOrdered: "asc" }],
-            select: this.selectTemplate,
+            select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -229,7 +229,7 @@ class OrderRouter {
                 },
               ],
             },
-            select: this.selectTemplate,
+            select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -257,7 +257,7 @@ class OrderRouter {
             where: {
               id: req.body.id,
             },
-            select: this.selectTemplate,
+            select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(

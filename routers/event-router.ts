@@ -17,7 +17,7 @@ class EventRouter {
   private selectRoute: string = "/select";
   private updateRoute: string = "/update";
 
-  private selectTemplate: object = {
+  private select: object = {
     id: true,
     datetimeStarted: true,
     datetimeEnded: true,
@@ -125,7 +125,7 @@ class EventRouter {
             where: {
               OR: [{ status: "active" }],
             },
-            select: this.selectTemplate,
+            select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -193,7 +193,7 @@ class EventRouter {
                 { status: "unpaid" },
               ],
             },
-            select: this.selectTemplate,
+            select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -273,7 +273,7 @@ class EventRouter {
                 },
               ],
             },
-            select: this.selectTemplate,
+            select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -348,7 +348,7 @@ class EventRouter {
                 },
               ],
             },
-            select: this.selectTemplate,
+            select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -376,7 +376,7 @@ class EventRouter {
             where: {
               id: req.body.id,
             },
-            select: this.selectTemplate,
+            select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(

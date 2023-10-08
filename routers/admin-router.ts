@@ -16,7 +16,7 @@ class AdminRouter {
   private selectRoute: string = "/select";
   private updateRoute: string = "/update";
 
-  private selectTemplate: object = {
+  private select: object = {
     id: true,
     role: true,
     status: true,
@@ -67,6 +67,35 @@ class AdminRouter {
       },
     },
   };
+
+  private orderBy: object = [
+    {
+      User: {
+        username: "asc",
+      },
+    },
+    {
+      User: {
+        UserInformation: {
+          lastname: "asc",
+        },
+      },
+    },
+    {
+      User: {
+        UserInformation: {
+          firstname: "asc",
+        },
+      },
+    },
+    {
+      User: {
+        UserInformation: {
+          middlename: "asc",
+        },
+      },
+    },
+  ];
 
   constructor() {
     this.router = Router();
@@ -155,7 +184,8 @@ class AdminRouter {
             where: {
               OR: [{ status: "ok" }],
             },
-            select: this.selectTemplate,
+            orderBy: this.orderBy,
+            select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -243,7 +273,8 @@ class AdminRouter {
                 },
               ],
             },
-            select: this.selectTemplate,
+            orderBy: this.orderBy,
+            select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -271,7 +302,8 @@ class AdminRouter {
             where: {
               id: req.body.id,
             },
-            select: this.selectTemplate,
+            orderBy: this.orderBy,
+            select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(

@@ -25,9 +25,7 @@ class AuthenticationService {
             { username: username },
             {
               Admin: {
-                User: {
-                  username: username,
-                },
+                status: "ok",
               },
             },
           ],

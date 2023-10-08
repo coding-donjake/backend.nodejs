@@ -15,7 +15,7 @@ class CustomerRouter {
   private selectRoute: string = "/select";
   private updateRoute: string = "/update";
 
-  private selectTemplate: object = {
+  private select: object = {
     id: true,
     address: true,
     phone: true,
@@ -120,7 +120,7 @@ class CustomerRouter {
             where: {
               OR: [{ status: "ok" }, { status: "flagged" }],
             },
-            select: this.selectTemplate,
+            select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -177,7 +177,7 @@ class CustomerRouter {
                 },
               ],
             },
-            select: this.selectTemplate,
+            select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(
@@ -205,7 +205,7 @@ class CustomerRouter {
             where: {
               id: req.body.id,
             },
-            select: this.selectTemplate,
+            select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(
