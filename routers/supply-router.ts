@@ -14,6 +14,7 @@ class SupplyRouter {
   private searchRoute: string = "/search";
   private selectRoute: string = "/select";
   private updateRoute: string = "/update";
+  private updateStockRoute: string = "/update-stock";
 
   private select: object = {
     id: true,
@@ -59,6 +60,7 @@ class SupplyRouter {
     this.setSearchRoute();
     this.setSelectRoute();
     this.setUpdateRoute();
+    this.setUpdateStockRoute();
   }
 
   private setCreateRoute = async () => {
@@ -203,6 +205,48 @@ class SupplyRouter {
           let result = await this.prismaService.prisma.supply.update({
             where: { id: req.body.id },
             data: req.body.data,
+          });
+          if (!result) return res.status(400).send();
+          console.log(`Supply ${req.body.id} updated.`);
+          req.body.data.id = req.body.id;
+          await this.prismaService.prisma.supplyLog.create({
+            data: {
+              type: "update",
+              supplyId: req.body.id,
+              operatorId: req.body.decodedToken.id,
+              content: req.body.data,
+            },
+          });
+          res.status(200).send();
+        } catch (error) {
+          console.error(error);
+          res.status(500).json({
+            status: "server error",
+            msg: error,
+          });
+        }
+      }
+    );
+  };
+
+  private setUpdateStockRoute = async () => {
+    this.router.post(
+      this.updateStockRoute,
+      [this.authService.verifyToken, this.authService.verifyUser],
+      async (req: Request, res: Response) => {
+        try {
+          console.log(
+            `Updating supply ${
+              req.body.id
+            } using the following data: ${JSON.stringify(req.body.data)}`
+          );
+          let result = await this.prismaService.prisma.supply.update({
+            where: { id: req.body.id },
+            data: {
+              stock: {
+                increment: req.body.data.quantity,
+              },
+            },
           });
           if (!result) return res.status(400).send();
           console.log(`Supply ${req.body.id} updated.`);
