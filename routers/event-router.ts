@@ -102,6 +102,67 @@ class EventRouter {
         },
       },
     },
+    Payment: {
+      where: {
+        status: "ok",
+      },
+      orderBy: {
+        datetimePayment: "asc",
+      },
+      select: {
+        id: true,
+        datetimePayment: true,
+        amount: true,
+        status: true,
+      },
+    },
+    Task: {
+      where: {
+        OR: [
+          { status: "active" },
+          { status: "completed" },
+          { status: "onhold" },
+        ],
+      },
+      orderBy: [
+        {
+          datetimeDeadline: "asc",
+        },
+      ],
+      select: {
+        id: true,
+        datetimeDeadline: true,
+        name: true,
+        status: true,
+        TaskAssignee: {
+          where: {
+            status: "ok",
+          },
+          select: {
+            id: true,
+            status: true,
+            User: {
+              select: {
+                id: true,
+                username: true,
+                status: true,
+                UserInformation: {
+                  select: {
+                    id: true,
+                    lastname: true,
+                    firstname: true,
+                    middlename: true,
+                    suffix: true,
+                    gender: true,
+                    birthdate: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   };
 
   constructor() {

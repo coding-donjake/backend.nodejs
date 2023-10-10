@@ -191,12 +191,13 @@ enum OrderSupplyStatus {
 }
 
 model Payment {
-  id         String        @id @default(uuid())
-  amount     Float
-  status     PaymentStatus @default(ok)
-  Event      Event?        @relation(fields: [eventId], references: [id])
-  eventId    String?
-  PaymentLog PaymentLog[]
+  id              String        @id @default(uuid())
+  datetimePayment DateTime      @default(now()) @db.DateTime()
+  amount          Float
+  status          PaymentStatus @default(ok)
+  Event           Event?        @relation(fields: [eventId], references: [id])
+  eventId         String?
+  PaymentLog      PaymentLog[]
 }
 
 model PaymentLog {
