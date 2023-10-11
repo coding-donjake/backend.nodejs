@@ -12,6 +12,7 @@ import SupplierRouter from "./routers/supplier-router";
 import SupplyRouter from "./routers/supply-router";
 import TaskAssigneeRouter from "./routers/task-assignee-router";
 import TaskRouter from "./routers/task-router";
+import PaymentRouter from "./routers/payment-router";
 
 class App {
   static instance: App;
@@ -23,6 +24,7 @@ class App {
   private eventSupplyRoute: string = "/event-supply";
   private orderRoute: string = "/order";
   private orderSupplyRoute: string = "/order-supply";
+  private paymentRoute: string = "/payment";
   private supplierRoute: string = "/supplier";
   private supplyRoute: string = "/supply";
   private taskRoute: string = "/task";
@@ -36,6 +38,7 @@ class App {
   private eventSupplyRouter: EventSupplyRouter;
   private orderRouter: OrderRouter;
   private orderSupplyRouter: OrderSupplyRouter;
+  private paymentRouter: PaymentRouter;
   private supplierRouter: SupplierRouter;
   private supplyRouter: SupplyRouter;
   private taskRouter: TaskRouter;
@@ -63,6 +66,9 @@ class App {
 
     this.orderSupplyRouter = new OrderSupplyRouter();
     this.express.use(this.orderSupplyRoute, this.orderSupplyRouter.router);
+
+    this.paymentRouter = new PaymentRouter();
+    this.express.use(this.paymentRoute, this.paymentRouter.router);
 
     this.supplierRouter = new SupplierRouter();
     this.express.use(this.supplierRoute, this.supplierRouter.router);

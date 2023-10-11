@@ -44,6 +44,16 @@ class EventSupplyRouter {
               content: eventSupply,
             },
           });
+          await this.prismaService.prisma.supply.update({
+            where: {
+              id: req.body.data.supplyId,
+            },
+            data: {
+              stock: {
+                decrement: req.body.data.quantity,
+              },
+            },
+          });
           res.status(200).json({ id: eventSupply.id });
         } catch (error) {
           console.error(error);

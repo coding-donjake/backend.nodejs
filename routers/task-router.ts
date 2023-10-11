@@ -96,7 +96,11 @@ class TaskRouter {
             )}`
           );
           const task = await this.prismaService.prisma.task.create({
-            data: req.body.data,
+            data: {
+              datetimeDeadline: req.body.data.datetimeDeadline,
+              name: req.body.data.name,
+              eventId: req.body.data.eventId,
+            },
           });
           console.log(`Task created: ${JSON.stringify(task)}`);
           await this.prismaService.prisma.taskLog.create({
@@ -105,6 +109,12 @@ class TaskRouter {
               taskId: task.id,
               operatorId: req.body.decodedToken.id,
               content: task,
+            },
+          });
+          await this.prismaService.prisma.taskAssignee.create({
+            data: {
+              taskId: task.id,
+              userId: req.body.data.userId,
             },
           });
           res.status(200).json({ id: task.id });

@@ -18,12 +18,10 @@ class PaymentRouter {
 
   private select: object = {
     id: true,
-    name: true,
-    brand: true,
-    type: true,
-    stock: true,
+    ndatetimePaymentme: true,
+    amount: true,
     status: true,
-    SupplyLog: {
+    PaymentLog: {
       orderBy: {
         datetime: "desc",
       },
@@ -53,6 +51,10 @@ class PaymentRouter {
     },
   };
 
+  private orderBy: object = {
+    datetimePayment: "asc",
+  };
+
   constructor() {
     this.router = Router();
     this.setCreateRoute();
@@ -60,7 +62,6 @@ class PaymentRouter {
     this.setSearchRoute();
     this.setSelectRoute();
     this.setUpdateRoute();
-    this.setUpdateStockRoute();
   }
 
   private setCreateRoute = async () => {
@@ -70,23 +71,33 @@ class PaymentRouter {
       async (req: Request, res: Response) => {
         try {
           console.log(
-            `Creating supply using the following data: ${JSON.stringify(
+            `Creating payment using the following data: ${JSON.stringify(
               req.body.data
             )}`
           );
-          const supply = await this.prismaService.prisma.supply.create({
+          const payment = await this.prismaService.prisma.payment.create({
             data: req.body.data,
           });
-          console.log(`Supply created: ${JSON.stringify(supply)}`);
-          await this.prismaService.prisma.supplyLog.create({
+          console.log(`Payment created: ${JSON.stringify(payment)}`);
+          await this.prismaService.prisma.paymentLog.create({
             data: {
               type: "create",
-              supplyId: supply.id,
+              paymentId: payment.id,
               operatorId: req.body.decodedToken.id,
-              content: supply,
+              content: payment,
             },
           });
-          res.status(200).json({ id: supply.id });
+          const event = await this.prismaService.prisma.event.update({
+            where: {
+              id: req.body.data.eventId,
+            },
+            data: {
+              balance: {
+                decrement: req.body.data.amount,
+              },
+            },
+          });
+          res.status(200).json({ id: payment.id });
         } catch (error) {
           console.error(error);
           res.status(500).json({
@@ -104,15 +115,16 @@ class PaymentRouter {
       [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.supply.findMany({
+          let result = await this.prismaService.prisma.payment.findMany({
             where: {
               status: "ok",
             },
+            orderBy: this.orderBy,
             select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} supplies sent to user ${req.body.decodedToken.id}.`
+            `${result.length} payments sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -132,24 +144,16 @@ class PaymentRouter {
       [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.supply.findMany({
+          let result = await this.prismaService.prisma.payment.findMany({
             where: {
-              AND: [
-                { status: "ok" },
-                {
-                  OR: [
-                    { name: req.body.key },
-                    { brand: req.body.key },
-                    { type: req.body.key },
-                  ],
-                },
-              ],
+              AND: [{ status: "ok" }],
             },
+            orderBy: this.orderBy,
             select: this.select,
           });
           if (!result) return res.status(400).send();
           console.log(
-            `${result.length} supplies sent to user ${req.body.decodedToken.id}.`
+            `${result.length} payments sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -169,7 +173,7 @@ class PaymentRouter {
       [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
-          let result = await this.prismaService.prisma.supply.findFirst({
+          let result = await this.prismaService.prisma.payment.findFirst({
             where: {
               id: req.body.id,
             },
@@ -177,7 +181,7 @@ class PaymentRouter {
           });
           if (!result) return res.status(400).send();
           console.log(
-            `supply record has been sent to user ${req.body.decodedToken.id}.`
+            `payment record has been sent to user ${req.body.decodedToken.id}.`
           );
           res.status(200).json({ data: result });
         } catch (error) {
@@ -198,63 +202,21 @@ class PaymentRouter {
       async (req: Request, res: Response) => {
         try {
           console.log(
-            `Updating supply ${
+            `Updating payment ${
               req.body.id
             } using the following data: ${JSON.stringify(req.body.data)}`
           );
-          let result = await this.prismaService.prisma.supply.update({
+          let result = await this.prismaService.prisma.payment.update({
             where: { id: req.body.id },
             data: req.body.data,
           });
           if (!result) return res.status(400).send();
-          console.log(`Supply ${req.body.id} updated.`);
+          console.log(`Payment ${req.body.id} updated.`);
           req.body.data.id = req.body.id;
-          await this.prismaService.prisma.supplyLog.create({
+          await this.prismaService.prisma.paymentLog.create({
             data: {
               type: "update",
-              supplyId: req.body.id,
-              operatorId: req.body.decodedToken.id,
-              content: req.body.data,
-            },
-          });
-          res.status(200).send();
-        } catch (error) {
-          console.error(error);
-          res.status(500).json({
-            status: "server error",
-            msg: error,
-          });
-        }
-      }
-    );
-  };
-
-  private setUpdateStockRoute = async () => {
-    this.router.post(
-      this.updateStockRoute,
-      [this.authService.verifyToken, this.authService.verifyUser],
-      async (req: Request, res: Response) => {
-        try {
-          console.log(
-            `Updating supply ${
-              req.body.id
-            } using the following data: ${JSON.stringify(req.body.data)}`
-          );
-          let result = await this.prismaService.prisma.supply.update({
-            where: { id: req.body.id },
-            data: {
-              stock: {
-                increment: req.body.data.quantity,
-              },
-            },
-          });
-          if (!result) return res.status(400).send();
-          console.log(`Supply ${req.body.id} updated.`);
-          req.body.data.id = req.body.id;
-          await this.prismaService.prisma.supplyLog.create({
-            data: {
-              type: "update",
-              supplyId: req.body.id,
+              paymentId: req.body.id,
               operatorId: req.body.decodedToken.id,
               content: req.body.data,
             },
