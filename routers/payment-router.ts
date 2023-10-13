@@ -18,7 +18,7 @@ class PaymentRouter {
 
   private select: object = {
     id: true,
-    ndatetimePaymentme: true,
+    datetimePayment: true,
     amount: true,
     status: true,
     PaymentLog: {

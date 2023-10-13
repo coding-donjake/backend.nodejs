@@ -137,10 +137,28 @@ class TaskRouter {
         try {
           let result = await this.prismaService.prisma.task.findMany({
             where: {
-              OR: [
-                { status: "active" },
-                { status: "completed" },
-                { status: "onhold" },
+              AND: [
+                {
+                  OR: [
+                    {
+                      Event: {
+                        status: "active",
+                      },
+                    },
+                    {
+                      Event: {
+                        status: "unpaid",
+                      },
+                    },
+                  ],
+                },
+                {
+                  OR: [
+                    { status: "active" },
+                    { status: "completed" },
+                    { status: "onhold" },
+                  ],
+                },
               ],
             },
             select: this.select,
