@@ -267,13 +267,10 @@ class UserRouter {
   private setSelectRoute = async () => {
     this.router.post(
       this.selectRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
+          if (req.body.operator) req.body.id = req.body.decodedToken.id;
           let result = await this.prismaService.prisma.user.findFirst({
             where: {
               id: req.body.id,
@@ -302,6 +299,7 @@ class UserRouter {
       [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
+          if (!req.body.id) req.body.id = req.body.decodedToken.id;
           console.log(
             `Updating user ${
               req.body.id

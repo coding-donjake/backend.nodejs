@@ -170,21 +170,22 @@ class BorrowingRouter {
   private setGetRoute = async () => {
     this.router.post(
       this.getRoute,
-      [
-        this.authService.verifyToken,
-        this.authService.verifyUser,
-        this.authService.verifyAdmin,
-      ],
+      [this.authService.verifyToken, this.authService.verifyUser],
       async (req: Request, res: Response) => {
         try {
+          if (req.body.userId) req.body.userId = req.body.decodedToken.id;
           let result = await this.prismaService.prisma.borrowing.findMany({
             where: {
-              OR: [
-                { status: "pending" },
-                { status: "active" },
-                { status: "completed" },
-                { status: "declined" },
-              ],
+              OR: req.body.status
+                ? [{ status: req.body.status }]
+                : req.body.userId
+                ? [{ User: { id: req.body.userId } }]
+                : [
+                    { status: "pending" },
+                    { status: "active" },
+                    { status: "completed" },
+                    { status: "declined" },
+                  ],
             },
             orderBy: [
               {
